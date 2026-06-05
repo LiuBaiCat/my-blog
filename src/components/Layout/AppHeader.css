@@ -1,0 +1,105 @@
+.app-header {
+  position: sticky !important;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-header);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: var(--bg-header) !important;
+  height: var(--header-height, 64px);
+  padding-inline: 48px;
+}
+
+.app-header-brand {
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--brand-gradient-start) 0%, var(--brand-gradient-end) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: opacity var(--transition-fast, 150ms ease);
+  margin-right: 48px;
+  letter-spacing: 0.5px;
+}
+
+.app-header-brand:hover {
+  opacity: 0.8;
+}
+
+.app-header-menu {
+  flex: 1;
+  min-width: 0;
+  border: none !important;
+}
+
+.app-header-search {
+  max-width: 240px;
+}
+
+.app-header .app-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle-btn {
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  color: var(--color-primary);
+}
+
+.theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding-inline: 16px;
+  }
+
+  .app-header-brand {
+    font-size: 18px;
+    margin-right: 16px;
+  }
+
+  .app-header-search {
+    max-width: 160px;
+  }
+
+  .app-header-mobile-actions {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 2px;
+  }
+
+  .app-header-hamburger,
+  .app-header-mobile-search-btn {
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast);
+  }
+
+  .app-header-hamburger:hover,
+  .app-header-mobile-search-btn:hover {
+    color: var(--color-primary);
+  }
+}

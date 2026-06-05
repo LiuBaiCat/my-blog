@@ -1,0 +1,38 @@
+.not-found-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+}
+
+.not-found-emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.not-found-title {
+  font-size: 72px !important;
+  font-weight: 700 !important;
+  background: var(--not-found-title-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px !important;
+}
+
+.not-found-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 24px;
+}
+
+@keyframes gentleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.not-found-emoji {
+  animation: gentleBounce 3s ease-in-out infinite;
+}

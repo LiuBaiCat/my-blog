@@ -1,0 +1,119 @@
+@import './styles/variables.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: var(--color-primary-light);
+  color: var(--text-primary);
+}
+
+body {
+  background-color: var(--bg-body);
+  background-image: radial-gradient(circle, var(--border-color-light) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.ant-tag {
+  margin-right: 8px;
+  transition: all var(--transition-fast);
+}
+
+.ant-tag:hover {
+  transform: translateY(-1px);
+}
+
+.ant-card-hoverable,
+.ant-btn,
+.ant-menu-item {
+  transition: all var(--transition-base) !important;
+}
+
+.ant-card-hoverable:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* Smooth theme transitions (only during explicit toggle) */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 300ms ease,
+              color 300ms ease,
+              border-color 300ms ease,
+              box-shadow 300ms ease !important;
+}
+
+/* ===== 自定义滚动条 ===== */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+.ant-card-body::-webkit-scrollbar { width: 6px; height: 6px; }
+.code-block-wrapper pre::-webkit-scrollbar,
+.markdown-body pre::-webkit-scrollbar { height: 8px; }
+
+::-webkit-scrollbar-track,
+.ant-card-body::-webkit-scrollbar-track,
+.code-block-wrapper pre::-webkit-scrollbar-track,
+.markdown-body pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb,
+.code-block-wrapper pre::-webkit-scrollbar-thumb,
+.markdown-body pre::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 4px;
+}
+
+.ant-card-body::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover,
+.ant-card-body::-webkit-scrollbar-thumb:hover,
+.code-block-wrapper pre::-webkit-scrollbar-thumb:hover,
+.markdown-body pre::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+}
+
+/* ===== 共享布局样式 ===== */
+
+.home-header,
+.archive-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-subtitle,
+.archive-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 0;
+}

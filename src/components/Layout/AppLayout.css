@@ -1,0 +1,44 @@
+.app-layout {
+  min-height: 100vh;
+}
+
+.app-content {
+  padding: 32px 48px;
+  display: flex;
+  justify-content: center;
+  animation: contentFadeIn 0.35s ease both;
+}
+
+.app-content-inner {
+  width: 100%;
+  max-width: var(--content-max-width, 960px);
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-top-btn .ant-float-btn-body {
+  backdrop-filter: blur(8px);
+  background: var(--bg-elevated, #ffffff) !important;
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-md, 0 4px 12px 0 rgba(0, 0, 0, 0.06));
+}
+
+[data-theme="dark"] .back-top-btn .ant-float-btn-body {
+  background: var(--bg-elevated, #1e1e36) !important;
+  border-color: var(--border-color, #2d2d44);
+}
+
+@media (max-width: 768px) {
+  .app-content {
+    padding: 16px 16px;
+  }
+}

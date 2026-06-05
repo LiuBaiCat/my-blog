@@ -1,0 +1,109 @@
+.archive-page {
+  padding-top: 4px;
+}
+
+.archive-header h2 {
+  margin-bottom: 0 !important;
+}
+
+.archive-year-section {
+  margin-bottom: 36px;
+}
+
+.archive-year-title {
+  margin-bottom: 20px !important;
+  position: relative;
+  padding-left: 16px;
+}
+
+.archive-year-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  background: var(--year-title-gradient);
+  border-radius: 2px;
+}
+
+.archive-timeline-date {
+  color: var(--text-tertiary, #9ca3af);
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.archive-pin-icon {
+  color: var(--color-gold);
+  font-size: 14px;
+}
+
+.archive-pin-icon-inline {
+  color: var(--color-gold);
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.archive-timeline-item.pinned {
+  background: linear-gradient(90deg, rgba(250, 173, 20, 0.06) 0%, transparent 100%);
+  border-radius: 6px;
+  padding: 2px 0;
+}
+
+.archive-timeline-item.pinned .archive-timeline-title {
+  color: var(--color-gold);
+  font-weight: 600;
+}
+
+.archive-pinned-tag {
+  font-size: 11px !important;
+  line-height: 18px !important;
+  padding: 0 6px !important;
+  margin: 0 4px !important;
+  color: var(--color-gold) !important;
+  background: rgba(250, 173, 20, 0.1) !important;
+  border-color: var(--color-gold) !important;
+}
+
+.archive-timeline-item {
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.archive-timeline-item:hover {
+  transform: translateX(4px);
+}
+
+.archive-timeline-title {
+  color: var(--color-primary, #1677ff);
+  font-weight: 500;
+}
+
+.archive-timeline-item:hover .archive-timeline-title {
+  color: var(--archive-link-hover);
+}
+
+.archive-timeline-tags {
+  margin-left: 6px;
+  display: inline;
+}
+
+.archive-tag {
+  font-size: 11px !important;
+  line-height: 18px !important;
+  padding: 0 5px !important;
+  margin: 0 !important;
+  color: var(--text-tertiary, #9ca3af) !important;
+  background: var(--tag-bg) !important;
+  border-color: var(--tag-border) !important;
+}
+
+.archive-year-section .ant-timeline-item-tail {
+  border-color: var(--border-color, #e5e7eb) !important;
+}
+
+@media (max-width: 768px) {
+  .archive-year-title::before {
+    display: none;
+  }
+}

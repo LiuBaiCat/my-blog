@@ -1,0 +1,148 @@
+:root {
+  /* Backgrounds */
+  --bg-body: #faf9f8;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f3f2f0;
+
+  /* Text */
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+
+  /* Brand */
+  --color-primary: #1677ff;
+  --color-primary-light: #e6f4ff;
+  --color-primary-bg: #f0f5ff;
+
+  /* Borders */
+  --border-color: #e5e7eb;
+  --border-color-light: #f0f0f0;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', Roboto, 'Helvetica Neue', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  /* Content max-width */
+  --content-max-width: 960px;
+
+  /* Layout */
+  --header-height: 64px;
+
+  /* Surfaces */
+  --bg-header: rgba(255, 255, 255, 0.95);
+  --bg-footer: #ffffff;
+
+  /* Brand gradient components */
+  --brand-gradient-start: #1677ff;
+  --brand-gradient-end: #4096ff;
+
+  /* Tables */
+  --table-header-bg: #f8f9fa;
+  --table-row-even-bg: #f8f9fa;
+
+  /* Code blocks */
+  --code-bg: #ffffff;
+  --code-header-bg: #f6f8fa;
+  --inline-code-bg: #f0f2f5;
+  --inline-code-color: #d63384;
+  --inline-code-border: #f0f0f0;
+
+  /* Tags (archive page) */
+  --tag-bg: #f3f4f6;
+  --tag-border: #e5e7eb;
+
+  /* Gradients / decorative */
+  --about-hero-gradient: linear-gradient(135deg, #f0f5ff 0%, #e6f4ff 50%, #fef3c7 100%);
+  --about-glow-blue: radial-gradient(circle, rgba(22, 119, 255, 0.08) 0%, transparent 70%);
+  --about-glow-yellow: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+  --about-avatar-shadow: 0 4px 14px rgba(22, 119, 255, 0.25);
+  --not-found-title-gradient: linear-gradient(135deg, #1677ff, #4096ff);
+  --year-title-gradient: linear-gradient(to bottom, var(--color-primary), #4096ff);
+  --archive-link-hover: #4096ff;
+
+  /* Misc */
+  --color-success: #52c41a;
+  --color-gold: #faad14;
+  --color-red: #ef4444;
+  --search-highlight-bg: #ffd54f;
+}
+
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-body: #0f0f1a;
+  --bg-card: #1a1a2e;
+  --bg-elevated: #1e1e36;
+  --bg-subtle: #16162a;
+
+  /* Text */
+  --text-primary: #e4e4ed;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+
+  /* Brand */
+  --color-primary: #4096ff;
+  --color-primary-light: #1a3050;
+  --color-primary-bg: #0d2137;
+
+  /* Borders */
+  --border-color: #2d2d44;
+  --border-color-light: #262640;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+  /* Surfaces */
+  --bg-header: rgba(22, 22, 42, 0.95);
+  --bg-footer: #16162a;
+
+  /* Brand gradient */
+  --brand-gradient-start: #4096ff;
+  --brand-gradient-end: #1677ff;
+
+  /* Tables */
+  --table-header-bg: #1e1e36;
+  --table-row-even-bg: #1a1a2e;
+
+  /* Code blocks */
+  --code-bg: #16162a;
+  --code-header-bg: #1a1a2e;
+  --inline-code-bg: #1e1e36;
+  --inline-code-color: #f0a0b0;
+  --inline-code-border: #2d2d44;
+
+  /* Tags */
+  --tag-bg: #1e1e36;
+  --tag-border: #2d2d44;
+
+  /* Gradients / decorative */
+  --about-hero-gradient: linear-gradient(135deg, #0d2137 0%, #1a3050 50%, #1a1505 100%);
+  --about-glow-blue: radial-gradient(circle, rgba(22, 119, 255, 0.15) 0%, transparent 70%);
+  --about-glow-yellow: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+  --about-avatar-shadow: 0 4px 14px rgba(64, 150, 255, 0.3);
+  --not-found-title-gradient: linear-gradient(135deg, #4096ff, #1677ff);
+  --year-title-gradient: linear-gradient(to bottom, var(--color-primary), #1677ff);
+  --archive-link-hover: #1677ff;
+
+  /* Misc */
+  --color-success: #52c41a;
+  --color-gold: #faad14;
+  --color-red: #ef4444;
+  --search-highlight-bg: #b8860b;
+}

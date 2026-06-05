@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>事件循环演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #1a1a2e; padding: 24px; color: #e0e0e0;
+    }
+    .card {
+      background: #16213e; border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3); padding: 24px; margin-bottom: 24px;
+    }
+    .demo-area { text-align: center; }
+    .demo-area h1 { margin-bottom: 16px; transition: color 0.1s; color: #e0e0e0; }
+    .demo-area h1.changed { color: #ff4d4f !important; }
+    .demo-area button {
+      padding: 8px 32px; font-size: 16px; background: #0f3460; color: #e0e0e0;
+      border: 1px solid #1a4a8a; border-radius: 6px; cursor: pointer; transition: all 0.3s;
+    }
+    .demo-area button:hover { background: #1a4a8a; }
+    .demo-area button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .demo-hint { margin-top: 10px; font-size: 13px; color: #888; }
+    .demo-status {
+      display: inline-block; padding: 2px 12px; border-radius: 4px;
+      font-size: 12px; font-weight: 600; margin-top: 8px;
+    }
+    .demo-status.running { background: #0f3460; color: #85a5ff; }
+    .demo-status.blocked { background: #3d0f0f; color: #ff4d4f; }
+    .demo-status.done { background: #0f3d1a; color: #52c41a; }
+
+    /* ===== 可视化 ===== */
+    .vis-title { font-size: 16px; text-align: center; margin-bottom: 16px; color: #85a5ff; font-weight: 600; }
+    .vis-container { display: flex; gap: 20px; align-items: stretch; }
+
+    /* 调用栈 */
+    .callstack-panel { width: 160px; flex-shrink: 0; }
+    .callstack-panel .panel-title {
+      font-size: 12px; font-weight: 600; color: #888; margin-bottom: 8px;
+      text-align: center; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .callstack-box {
+      border: 1px solid #2a2a4a; border-radius: 6px; min-height: 280px;
+      background: #0d0d1a; display: flex; flex-direction: column-reverse; padding: 6px; gap: 3px;
+    }
+    .stack-frame {
+      padding: 6px 10px; border-radius: 4px; font-size: 12px;
+      font-family: 'Courier New', monospace; background: #1a1a3e; color: #85a5ff;
+      border-left: 3px solid #85a5ff; transition: all 0.3s;
+      opacity: 0; transform: translateY(5px);
+    }
+    .stack-frame.show { opacity: 1; transform: translateY(0); }
+    .stack-frame.active { background: #2a2a5e; border-left-color: #52c41a; color: #52c41a; }
+    .stack-frame.blocked-frame { background: #3d0f0f; border-left-color: #ff4d4f; color: #ff4d4f; }
+    .stack-frame.bottom { color: #666; border-left-color: #444; background: #111; }
+
+    .main-area { flex: 1; }
+    .lanes { display: flex; flex-direction: column; gap: 6px; }
+    .lane { display: flex; align-items: stretch; min-height: 56px; border-radius: 8px; overflow: hidden; }
+    .lane-label {
+      width: 100px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; flex-shrink: 0; padding: 8px;
+    }
+    .lane-track {
+      flex: 1; padding: 8px 12px; display: flex; align-items: center;
+      gap: 6px; flex-wrap: wrap; min-height: 56px; transition: background 0.3s;
+    }
+
+    .lane-interaction .lane-label { background: #1a2a1a; color: #95de64; }
+    .lane-interaction .lane-track { background: #0d1a0d; border: 1px solid #1a3a1a; border-left: none; }
+    .lane-queue .lane-label { background: #1a1a2e; color: #85a5ff; }
+    .lane-queue .lane-track { background: #0d0d1a; border: 1px solid #1a1a4a; border-left: none; }
+    .lane-main .lane-label { background: #2a1a1a; color: #ff4d4f; }
+    .lane-main .lane-track { background: #1a0d0d; border: 1px solid #3a1a1a; border-left: none; }
+    .lane-main.running .lane-label { background: #1a2a1a; color: #52c41a; }
+    .lane-main.running .lane-track { background: #0d1a0d; border-color: #2a4a2a; }
+    .lane-main.blocked .lane-label { background: #3d0f0f; color: #ff4d4f; }
+    .lane-main.blocked .lane-track { background: #2a0a0a; border-color: #4a1a1a; }
+
+    .task {
+      padding: 6px 12px; border-radius: 5px; font-size: 12px;
+      font-weight: 500; transition: all 0.3s; animation: popIn 0.3s ease;
+      white-space: nowrap; font-family: 'Courier New', monospace;
+    }
+    @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes flash { 0%, 100% { box-shadow: 0 0 4px rgba(255,77,79,0.3); } 50% { box-shadow: 0 0 16px rgba(255,77,79,0.8); } }
+    .task-click { background: #2a4a1a; color: #95de64; border: 1px solid #3a6a2a; }
+    .task-callback { background: #1a2a4a; color: #85a5ff; border: 1px solid #2a4a6a; }
+    .task-exec { background: #1a3a1a; color: #73d13d; border: 1px solid #2a5a2a; }
+    .task-blocked { background: #4a1a1a; color: #ff4d4f; border: 1px solid #6a2a2a; animation: pulse 1s infinite, flash 2s infinite; }
+    .task-render { background: #2a1a4a; color: #b37feb; border: 1px solid #4a2a6a; }
+    .task-queued { background: #1a1a1a; color: #888; border: 1px solid #2a2a2a; font-size: 11px; }
+
+    .status-bar {
+      margin-top: 12px; padding: 12px 16px; border-radius: 6px;
+      font-size: 13px; display: flex; align-items: center;
+      gap: 10px; min-height: 48px; transition: all 0.3s;
+    }
+    .status-bar.idle { background: #0d1a0d; border-left: 4px solid #52c41a; }
+    .status-bar.running { background: #0d0d1a; border-left: 4px solid #1677ff; }
+    .status-bar.blocked { background: #1a0d0d; border-left: 4px solid #ff4d4f; }
+    .status-bar.done { background: #0d1a0d; border-left: 4px solid #52c41a; }
+
+    .step-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .step-badge.idle { background: #1a1a; color: #666; }
+    .step-badge.active { background: #1677ff; color: #fff; }
+    .step-badge.blocked { background: #ff4d4f; color: #fff; }
+    .step-badge.done { background: #52c41a; color: #fff; }
+
+    .progress-indicator {
+      display: flex; gap: 4px; justify-content: center; margin-bottom: 12px;
+    }
+    .progress-dot {
+      width: 20px; height: 20px; border-radius: 50%; font-size: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: #1a1a2e; color: #444; border: 1px solid #2a2a4a;
+      transition: all 0.3s; cursor: default;
+    }
+    .progress-dot.done { background: #1a3a1a; color: #52c41a; border-color: #2a5a2a; }
+    .progress-dot.current { background: #0f3460; color: #85a5ff; border-color: #1a4a8a; box-shadow: 0 0 8px rgba(22,119,255,0.3); }
+    .progress-dot.blocked-dot { background: #3d0f0f; color: #ff4d4f; border-color: #5a1a1a; }
+
+    .legend {
+      display: flex; gap: 14px; justify-content: center;
+      margin-bottom: 12px; font-size: 11px; color: #888; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    .vis-actions { text-align: center; margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .vis-actions button {
+      padding: 8px 24px; font-size: 14px; border: none;
+      border-radius: 6px; cursor: pointer; transition: all 0.2s; font-weight: 500;
+    }
+    .vis-actions button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-next { background: #0f3460; color: #85a5ff; border: 1px solid #1a4a8a; }
+    .btn-next:hover:not(:disabled) { background: #1a4a8a; }
+    .btn-auto { background: #1a3a1a; color: #73d13d; border: 1px solid #2a5a2a; }
+    .btn-auto:hover:not(:disabled) { background: #2a4a2a; }
+    .btn-auto.stop { background: #3d0f0f; color: #ff4d4f; border-color: #5a1a1a; }
+    .btn-auto.stop:hover:not(:disabled) { background: #4d1a1a; }
+    .btn-reset { background: #1a1a2e; border: 1px solid #2a2a4a; color: #888; }
+    .btn-reset:hover:not(:disabled) { background: #2a2a4a; color: #aaa; }
+
+    .callstack-hint { font-size: 11px; color: #555; text-align: center; margin-top: 6px; }
+    .step-counter { font-size: 13px; color: #888; text-align: center; margin-top: 8px; }
+
+    @media (max-width: 640px) {
+      .vis-container { flex-direction: column; }
+      .callstack-panel { width: 100%; }
+      .callstack-box { min-height: auto; flex-direction: row; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== 原始 Demo ========== -->
+  <div class="card demo-area">
+    <h1 id="title">事件循环</h1>
+    <button id="changeBtn">change</button>
+    <div class="demo-hint">
+      点击 change → 标题变红（JS执行）→ <code>delay(2000)</code> 阻塞主线程 2 秒 → 2 秒后渲染
+    </div>
+    <div id="demoStatus" class="demo-status done">等待操作</div>
+  </div>
+
+  <!-- ========== 可视化面板 ========== -->
+  <div class="card">
+    <div class="vis-title">▸ 事件循环 · 逐步演示</div>
+
+    <!-- 步骤进度条 -->
+    <div class="progress-indicator" id="progressBar"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#95de64"></span> 交互</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#85a5ff"></span> 消息队列</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#73d13d"></span> 执行中</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#ff4d4f"></span> 阻塞</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#b37feb"></span> 渲染</span>
+    </div>
+
+    <div class="vis-container">
+      <!-- 调用栈 -->
+      <div class="callstack-panel">
+        <div class="panel-title">调用栈</div>
+        <div class="callstack-box" id="callstackBox">
+          <div class="stack-frame bottom show">(anonymous / 全局)</div>
+        </div>
+        <div class="callstack-hint">越靠上 = 越新</div>
+      </div>
+
+      <!-- 主区域 -->
+      <div class="main-area">
+        <div class="lanes">
+          <div class="lane lane-interaction">
+            <div class="lane-label">🖱 交互线程</div>
+            <div class="lane-track" id="trackInteraction"></div>
+          </div>
+          <div class="lane lane-queue">
+            <div class="lane-label">📋 消息队列</div>
+            <div class="lane-track" id="trackQueue"></div>
+          </div>
+          <div class="lane lane-main" id="laneMain">
+            <div class="lane-label">⚡ 渲染主线程</div>
+            <div class="lane-track" id="trackMain"></div>
+          </div>
+        </div>
+
+        <div class="status-bar idle" id="statusBar">
+          <span class="step-badge idle" id="stepBadge">0</span>
+          <span class="status-text" id="statusText">准备好，点击「下一步」逐步查看</span>
+        </div>
+        <div class="step-counter" id="stepCounter">0 / 12</div>
+      </div>
+    </div>
+
+    <div class="vis-actions">
+      <button class="btn-next" id="nextBtn">下一步 →</button>
+      <button class="btn-auto" id="autoBtn">▶ 自动播放</button>
+      <button class="btn-reset" id="resetBtn">↺ 重置</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== DOM =====
+    const title = document.getElementById("title");
+    const btn = document.getElementById("changeBtn");
+    const demoStatus = document.getElementById("demoStatus");
+    const tracks = {
+      interaction: document.getElementById("trackInteraction"),
+      queue: document.getElementById("trackQueue"),
+      main: document.getElementById("trackMain"),
+    };
+    const laneMain = document.getElementById("laneMain");
+    const statusBar = document.getElementById("statusBar");
+    const stepBadge = document.getElementById("stepBadge");
+    const statusText = document.getElementById("statusText");
+    const stepCounter = document.getElementById("stepCounter");
+    const callstackBox = document.getElementById("callstackBox");
+    const progressBar = document.getElementById("progressBar");
+    const nextBtn = document.getElementById("nextBtn");
+    const autoBtn = document.getElementById("autoBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    // ===== 状态 =====
+    let currentStep = 0;
+    let autoPlaying = false;
+    let autoTimer = null;
+    let finished = false;
+
+    // ===== 步骤定义 =====
+    const TOTAL_STEPS = 12;
+    const STEP_LABELS = [
+      "点击事件",       // 1
+      "入消息队列",     // 2
+      "事件循环取出",   // 3
+      "推入调用栈",     // 4
+      "修改 DOM",       // 5
+      "执行 delay",     // 6
+      "主线程阻塞",     // 7
+      "delay 结束",     // 8
+      "回调结束",       // 9
+      "渲染红色",       // 10
+      "处理排队任务",   // 11
+      "完成",           // 12
+    ];
+
+    function clearTracks() {
+      Object.values(tracks).forEach(t => {
+        t.querySelectorAll(".task").forEach(el => el.remove());
+      });
+    }
+
+    function addTask(parent, cls, text) {
+      const el = document.createElement("span");
+      el.className = "task " + cls;
+      el.textContent = text;
+      parent.appendChild(el);
+      return el;
+    }
+
+    function setStatus(type, num, text) {
+      const badgeCls = type === "running" ? "active" : type;
+      statusBar.className = "status-bar " + type;
+      stepBadge.className = "step-badge " + badgeCls;
+      stepBadge.textContent = num;
+      statusText.textContent = text;
+    }
+
+    function updateCounter() {
+      stepCounter.textContent = `${currentStep} / ${TOTAL_STEPS}`;
+    }
+
+    function buildProgressBar() {
+      progressBar.innerHTML = "";
+      for (let i = 0; i < TOTAL_STEPS; i++) {
+        const dot = document.createElement("div");
+        dot.className = "progress-dot";
+        dot.textContent = i + 1;
+        dot.title = STEP_LABELS[i];
+        progressBar.appendChild(dot);
+      }
+    }
+
+    // ===== 调用栈 =====
+    let stackFrames = [];
+
+    function resetStack() {
+      stackFrames = [];
+      callstackBox.innerHTML = `<div class="stack-frame bottom show">(anonymous / 全局)</div>`;
+    }
+
+    function pushStack(name, cls = "") {
+      const el = document.createElement("div");
+      el.className = `stack-frame show ${cls}`;
+      el.textContent = name;
+      const last = callstackBox.lastElementChild;
+      callstackBox.insertBefore(el, last);
+      stackFrames.push(el);
+      return el;
+    }
+
+    function popStack() {
+      const el = stackFrames.pop();
+      if (el) { el.style.opacity = "0"; el.style.transform = "translateY(-5px)"; setTimeout(() => el.remove(), 300); }
+    }
+
+    function clearStack() {
+      stackFrames = [];
+      callstackBox.innerHTML = `<div class="stack-frame bottom show">(anonymous / 全局)</div>`;
+    }
+
+    // ===== 步骤状态定义（每步描述完整的 UI 状态） =====
+    const STEP_STATES = [
+      // 1: 点击事件
+      {
+        type: "running",
+        interaction: [{ cls: "task-click", text: "click 事件" }],
+        queue: [],
+        main: [],
+        stack: [],
+        laneClass: "",
+        status: { type: "running", num: "1", text: "用户点击「change」按钮 → 交互线程捕获 click 事件" },
+      },
+      // 2: 入消息队列
+      {
+        type: "running",
+        interaction: [],
+        queue: [{ cls: "task-callback", text: "Task: change 回调" }],
+        main: [],
+        stack: [],
+        laneClass: "",
+        status: { type: "running", num: "2", text: "交互线程将回调包装成 Task → 放入消息队列末尾排队" },
+      },
+      // 3: 事件循环取出
+      {
+        type: "running",
+        interaction: [],
+        queue: [{ cls: "task-callback", text: "Task: change 回调" }],
+        main: [],
+        stack: [],
+        laneClass: "",
+        status: { type: "running", num: "3", text: "事件循环（Event Loop）检查消息队列 → 发现有任务等待 → 取出" },
+      },
+      // 4: 推入调用栈
+      {
+        type: "running",
+        interaction: [],
+        queue: [],
+        main: [{ cls: "task-exec", text: "执行 change 回调" }],
+        stack: ["change 回调"],
+        laneClass: "",
+        status: { type: "running", num: "4", text: "将回调函数 push 到调用栈 → 开始执行" },
+      },
+      // 5: 修改 DOM
+      {
+        type: "running",
+        interaction: [],
+        queue: [],
+        main: [{ cls: "task-exec", text: "执行 change 回调" }],
+        stack: ["change 回调", { name: "h1.style.color = 'red'", cls: "active" }],
+        laneClass: "",
+        status: { type: "running", num: "5", text: '第 1 行: h1.style.color = "red" → 修改 DOM 属性（快速执行并返回）' },
+      },
+      // 6: 执行 delay(2000)
+      {
+        type: "running",
+        interaction: [],
+        queue: [],
+        main: [{ cls: "task-exec", text: "执行 change 回调" }],
+        stack: ["change 回调", "delay(2000)"],
+        laneClass: "",
+        status: { type: "running", num: "6", text: "第 2 行: delay(2000) → 推入调用栈，开始 while 死循环" },
+      },
+      // 7: 主线程阻塞
+      {
+        type: "blocked",
+        interaction: [],
+        queue: [
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+        ],
+        main: [{ cls: "task-blocked", text: "while (时间未到) { 空循环 }" }],
+        stack: ["change 回调", { name: "delay(2000)", cls: "blocked-frame" }],
+        laneClass: "blocked",
+        status: { type: "blocked", num: "!", text: "⚠ while 循环持续 2 秒 → 调用栈卡住 → 主线程冻结！期间用户点击 → 消息队列堆积 3 个事件" },
+      },
+      // 8: delay 结束
+      {
+        type: "running",
+        interaction: [],
+        queue: [
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+        ],
+        main: [{ cls: "task-exec", text: "空闲" }],
+        stack: [],
+        laneClass: "running",
+        status: { type: "running", num: "8", text: "delay(2000) 执行完毕 → change 回调弹出 → 调用栈清空 → 主线程恢复空闲" },
+      },
+      // 9: 等待渲染
+      {
+        type: "running",
+        interaction: [],
+        queue: [
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+        ],
+        main: [{ cls: "task-exec", text: "空闲 ✓" }],
+        stack: [],
+        laneClass: "running",
+        status: { type: "running", num: "9", text: "主线程空闲 → 事件循环检查是否有待处理任务 → 有渲染任务等待" },
+      },
+      // 10: 渲染红色
+      {
+        type: "running",
+        interaction: [],
+        queue: [
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+          { cls: "task-queued", text: "click (排队中)" },
+        ],
+        main: [{ cls: "task-render", text: "渲染任务: 绘制红色" }],
+        stack: [],
+        laneClass: "running",
+        status: { type: "running", num: "10", text: "执行渲染任务 → 将红色绘制到屏幕上" },
+      },
+      // 11: 处理排队任务
+      {
+        type: "running",
+        interaction: [],
+        queue: [],
+        main: [{ cls: "task-exec", text: "空闲 ✓" }],
+        stack: [],
+        laneClass: "running",
+        status: { type: "running", num: "11", text: "事件循环继续 → 依次处理消息队列中排队的 3 个 click 事件" },
+      },
+      // 12: 完成
+      {
+        type: "done",
+        interaction: [],
+        queue: [],
+        main: [{ cls: "task-render", text: "空闲 ✓" }],
+        stack: [],
+        laneClass: "running",
+        status: { type: "done", num: "✓", text: "演示完成！color = 'red' 虽先执行，但渲染被 delay 阻塞，2 秒后才呈现到屏幕" },
+      },
+    ];
+
+    function updateProgressBar() {
+      const dots = progressBar.querySelectorAll(".progress-dot");
+      dots.forEach((dot, i) => {
+        dot.className = "progress-dot";
+        if (i + 1 < currentStep) dot.classList.add("done");
+        else if (i + 1 === currentStep) {
+          const stepType = STEP_STATES[i]?.type || "active";
+          dot.classList.add(stepType === "blocked" ? "blocked-dot" : "current");
+        }
+      });
+    }
+
+    function renderStep(step) {
+      // 清空
+      clearTracks();
+      resetStack();
+      laneMain.className = "lane lane-main";
+      finished = false;
+      demoStatus.className = "demo-status done";
+      demoStatus.textContent = "可视演示进行中";
+
+      if (step <= 0) return;
+
+      const s = STEP_STATES[step - 1];
+      if (!s) return;
+
+      // 渲染各轨道
+      s.interaction.forEach(t => addTask(tracks.interaction, t.cls, t.text));
+      s.queue.forEach(t => addTask(tracks.queue, t.cls, t.text));
+      s.main.forEach(t => addTask(tracks.main, t.cls, t.text));
+
+      // 渲染调用栈
+      s.stack.forEach(item => {
+        const name = typeof item === "string" ? item : item.name;
+        const cls = typeof item === "string" ? "" : item.cls;
+        pushStack(name, cls || "");
+      });
+
+      // 主线程样式
+      if (s.laneClass) laneMain.className = "lane lane-main " + s.laneClass;
+
+      // 状态
+      setStatus(s.status.type, s.status.num, s.status.text);
+      currentStep = step;
+      updateCounter();
+      updateProgressBar();
+      nextBtn.disabled = (step >= TOTAL_STEPS);
+      if (step >= TOTAL_STEPS) {
+        finished = true;
+        demoStatus.textContent = "✅ 可视演示完成";
+      }
+    }
+
+    // ===== 核心：跳转到某一步 =====
+    function goToStep(step) {
+      if (step <= 0 || step > TOTAL_STEPS) return;
+      if (finished && step === TOTAL_STEPS) return;
+      renderStep(step);
+    }
+
+    // ===== 下一步 =====
+    function nextStep() {
+      if (finished) return;
+      if (currentStep < TOTAL_STEPS) {
+        goToStep(currentStep + 1);
+      }
+    }
+
+    // ===== 重置 =====
+    function resetAll() {
+      stopAutoPlay();
+      currentStep = 0;
+      finished = false;
+      clearTracks();
+      resetStack();
+      laneMain.className = "lane lane-main";
+      setStatus("idle", "0", "准备好，点击「下一步」逐步查看");
+      stepBadge.className = "step-badge idle";
+      stepBadge.textContent = "0";
+      updateCounter();
+      updateProgressBar();
+      nextBtn.disabled = false;
+      demoStatus.className = "demo-status done";
+      demoStatus.textContent = "等待操作";
+    }
+
+    // ===== 自动播放 =====
+    function stopAutoPlay() {
+      autoPlaying = false;
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      autoBtn.textContent = "▶ 自动播放";
+      autoBtn.className = "btn-auto";
+      nextBtn.disabled = (currentStep >= TOTAL_STEPS);
+    }
+
+    function toggleAutoPlay() {
+      if (autoPlaying) {
+        stopAutoPlay();
+        return;
+      }
+      // 如果已经完成或没开始，重置
+      if (finished || currentStep === TOTAL_STEPS || currentStep === 0) {
+        resetAll();
+      }
+      autoPlaying = true;
+      autoBtn.textContent = "■ 停止";
+      autoBtn.className = "btn-auto stop";
+      nextBtn.disabled = true;
+
+      function tick() {
+        if (!autoPlaying) return;
+        if (currentStep < TOTAL_STEPS) {
+          goToStep(currentStep + 1);
+          autoTimer = setTimeout(tick, 1200);
+        } else {
+          stopAutoPlay();
+        }
+      }
+      autoTimer = setTimeout(tick, 600);
+    }
+
+    // ===== 原始 demo =====
+    function delay(duration) {
+      const start = Date.now();
+      while (Date.now() - start < duration) {}
+    }
+
+    btn.addEventListener("click", () => {
+      demoStatus.className = "demo-status blocked";
+      demoStatus.textContent = "❄ 主线程阻塞中（2s）...";
+      title.classList.add("changed");
+      delay(2000);
+      demoStatus.className = "demo-status done";
+      demoStatus.textContent = "✅ 阻塞结束，红色已渲染";
+    });
+
+    // ===== 初始化 =====
+    buildProgressBar();
+    resetAll();
+
+    // ===== 事件绑定 =====
+    nextBtn.addEventListener("click", nextStep);
+    autoBtn.addEventListener("click", toggleAutoPlay);
+    resetBtn.addEventListener("click", resetAll);
+  </script>
+</body>
+</html>
