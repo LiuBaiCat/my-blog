@@ -62,7 +62,7 @@ def fibonacci(n):
 
 ## 图片
 
-![React logo](/src/assets/react.svg)
+![favicon](/favicon.svg)
 
 ## 任务列表
 
