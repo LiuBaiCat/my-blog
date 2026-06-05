@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../../hooks/useTheme'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import ReadingProgressBar from '../ReadingProgressBar'
+import StarIcon from '../Icons/StarIcon'
 import './AppHeader.css'
 
 const { Header } = Layout
@@ -52,6 +53,7 @@ function AppHeader() {
       className="app-header-brand"
       onClick={() => navigate('/')}
     >
+      <StarIcon size={14} className="app-header-brand-star" />
       Liubai's Blog
     </div>
   )

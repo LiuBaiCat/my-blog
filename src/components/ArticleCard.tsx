@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import type { PostMeta } from '../types/blog'
 import { highlightText } from '../utils/highlight'
 import { formatDate } from '../utils/formatDate'
+import { getTagColor } from '../utils/tagColors'
+import StarIcon from './Icons/StarIcon'
 import './ArticleCard.css'
 
 const { Paragraph } = Typography
@@ -31,6 +33,7 @@ function ArticleCard({ title, date, tags, description, slug, highlight, pinned }
       tabIndex={0}
       aria-label={`阅读文章：${title}`}
     >
+      {pinned && <StarIcon size={16} className="article-card-star" color="var(--color-warm-yellow)" />}
       <Card.Meta
         title={highlight ? highlightText(title, highlight) : title}
         description={
@@ -47,11 +50,14 @@ function ArticleCard({ title, date, tags, description, slug, highlight, pinned }
               {highlight ? highlightText(description, highlight) : description}
             </Paragraph>
             <div className="article-card-tags">
-              {tags.map(tag => (
-                <Tag key={tag} color="blue">
-                  {highlight ? highlightText(tag, highlight) : tag}
-                </Tag>
-              ))}
+              {tags.map(tag => {
+                const { accent, bg } = getTagColor(tag)
+                return (
+                  <Tag key={tag} style={{ color: accent, background: bg, borderColor: `${accent}33` }}>
+                    {highlight ? highlightText(tag, highlight) : tag}
+                  </Tag>
+                )
+              })}
             </div>
           </>
         }

@@ -1,10 +1,13 @@
-import { Typography, Empty, Input, Tag, Card } from 'antd'
-import { CalendarOutlined } from '@ant-design/icons'
+import { Typography, Input, Tag, Card } from 'antd'
+import { CalendarOutlined, SearchOutlined } from '@ant-design/icons'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useMemo } from 'react'
 import { searchPosts } from '../utils/posts'
 import { highlightText } from '../utils/highlight'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import StarIcon from '../components/Icons/StarIcon'
+import MoonIcon from '../components/Icons/MoonIcon'
+import RocketIcon from '../components/Icons/RocketIcon'
 import './Search.css'
 
 function Search() {
@@ -22,6 +25,12 @@ function Search() {
 
   return (
     <div className="search-page">
+      <div className="search-decoration">
+        <StarIcon size={18} className="search-star search-star-1" />
+        <StarIcon size={12} className="search-star search-star-2" />
+        <MoonIcon size={24} className="search-moon" />
+        <RocketIcon size={20} className="search-rocket" />
+      </div>
       <Input.Search
         className="search-input"
         placeholder="搜索文章..."
@@ -87,7 +96,17 @@ function Search() {
         ))
       ) : (
         <div className="search-empty">
-          <Empty description={q ? `未找到与"${q}"相关的文章` : '请输入关键词搜索'} />
+          <div className="search-empty-icon">
+            <SearchOutlined />
+          </div>
+          <div className="search-empty-text">
+            {q ? `未找到与"${q}"相关的文章` : '请输入关键词搜索'}
+          </div>
+          {!q && (
+            <div className="search-empty-hint">
+              试试搜索你感兴趣的技术话题
+            </div>
+          )}
         </div>
       )}
     </div>

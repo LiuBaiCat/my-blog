@@ -2,18 +2,89 @@
   padding-top: 4px;
 }
 
+.archive-decoration {
+  position: relative;
+  height: 35px;
+  margin-bottom: 5px;
+}
+
+.archive-page-star {
+  position: absolute;
+  pointer-events: none;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.archive-page-star-1 {
+  left: 15%;
+  top: 5px;
+  animation-delay: 0s;
+}
+
+.archive-page-star-2 {
+  right: 20%;
+  top: 10px;
+  animation-delay: 1.2s;
+}
+
+.archive-page-moon {
+  position: absolute;
+  right: 10%;
+  top: 0;
+  pointer-events: none;
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
 .archive-header h2 {
   margin-bottom: 0 !important;
 }
 
 .archive-year-section {
   margin-bottom: 36px;
+  position: relative;
+}
+
+/* 年份之间的暖色渐变分隔线 */
+.archive-year-section + .archive-year-section {
+  padding-top: 12px;
+}
+
+.archive-year-section + .archive-year-section::before {
+  content: '✦';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: var(--color-primary, #1677ff);
+  opacity: 0.4;
+}
+
+.archive-year-section + .archive-year-section::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 5%;
+  right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-primary-light), var(--color-primary), var(--color-primary-light), transparent);
+  opacity: 0.2;
 }
 
 .archive-year-title {
   margin-bottom: 20px !important;
   position: relative;
   padding-left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.archive-year-star {
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.archive-year-clover {
+  animation: starFloat 5s ease-in-out infinite;
 }
 
 .archive-year-title::before {
@@ -23,8 +94,9 @@
   top: 6px;
   bottom: 6px;
   width: 4px;
-  background: var(--year-title-gradient);
+  background: var(--color-primary, #1677ff);
   border-radius: 2px;
+  box-shadow: 0 0 6px rgba(22, 119, 255, 0.2);
 }
 
 .archive-timeline-date {
@@ -45,14 +117,25 @@
 }
 
 .archive-timeline-item.pinned {
-  background: linear-gradient(90deg, rgba(250, 173, 20, 0.06) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.08) 0%, transparent 100%);
   border-radius: 6px;
   padding: 2px 0;
 }
 
 .archive-timeline-item.pinned .archive-timeline-title {
-  color: var(--color-gold);
+  color: var(--color-warm-orange, #f97316);
   font-weight: 600;
+}
+
+/* 置顶图标旋转动画 */
+.archive-pin-icon {
+  animation: pinBounce 3s ease-in-out infinite;
+}
+
+@keyframes pinBounce {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(5deg); }
 }
 
 .archive-pinned-tag {
@@ -91,15 +174,54 @@
 .archive-tag {
   font-size: 11px !important;
   line-height: 18px !important;
-  padding: 0 5px !important;
+  padding: 0 6px !important;
   margin: 0 !important;
-  color: var(--text-tertiary, #9ca3af) !important;
-  background: var(--tag-bg) !important;
-  border-color: var(--tag-border) !important;
+  border-radius: 3px !important;
+  color: var(--color-primary, #1677ff) !important;
+  background: var(--color-primary-bg) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+/* 归档页入场动画 */
+.archive-year-section {
+  animation: archiveFadeIn 0.5s ease both;
+}
+
+.archive-year-section:nth-child(2) { animation-delay: 0.1s; }
+.archive-year-section:nth-child(3) { animation-delay: 0.2s; }
+.archive-year-section:nth-child(4) { animation-delay: 0.3s; }
+.archive-year-section:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes archiveFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .archive-year-section .ant-timeline-item-tail {
-  border-color: var(--border-color, #e5e7eb) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+/* Timeline 圆点蓝色 */
+.archive-year-section .ant-timeline-item-head {
+  border-color: var(--color-primary, #1677ff) !important;
+}
+
+.archive-year-section .ant-timeline-item-head-blue {
+  color: var(--color-primary, #1677ff) !important;
+  border-color: var(--color-primary, #1677ff) !important;
+}
+
+.archive-timeline-item:hover {
+  transform: translateX(4px);
+  background: var(--color-primary-bg) !important;
+  border-radius: 4px;
+  padding-left: 4px;
 }
 
 @media (max-width: 768px) {

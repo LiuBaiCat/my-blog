@@ -7,9 +7,43 @@
   padding: 48px 24px 40px;
   margin-bottom: 32px;
   background: var(--about-hero-gradient);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: 0;
   position: relative;
   overflow: hidden;
+}
+
+.about-hero-star {
+  position: absolute;
+  pointer-events: none;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.about-hero-star-1 {
+  top: 20px;
+  right: 30px;
+  animation-delay: 0s;
+}
+
+.about-hero-star-2 {
+  bottom: 30px;
+  left: 25px;
+  animation-delay: 1.2s;
+}
+
+.about-hero-moon {
+  position: absolute;
+  top: 15px;
+  left: 30px;
+  pointer-events: none;
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
+.about-hero-rocket {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  pointer-events: none;
+  animation: rocketFloat 4s ease-in-out infinite;
 }
 
 .about-hero::before {
@@ -38,12 +72,13 @@
 
 .about-avatar {
   margin-bottom: 20px;
-  box-shadow: var(--about-avatar-shadow);
-  transition: transform var(--transition-base, 250ms ease);
+  box-shadow: var(--about-avatar-shadow), 0 0 20px rgba(251, 191, 36, 0.1);
+  transition: transform var(--transition-base, 250ms ease), box-shadow var(--transition-base, 250ms ease);
 }
 
 .about-avatar:hover {
   transform: scale(1.05);
+  box-shadow: var(--about-avatar-shadow), 0 0 30px rgba(251, 191, 36, 0.2);
 }
 
 .about-name {
@@ -59,6 +94,22 @@
 
 .about-section {
   margin-bottom: 28px;
+  position: relative;
+}
+
+/* 区块间星星装饰分隔 */
+.about-section + .about-section {
+  padding-top: 8px;
+}
+
+.about-section + .about-section::before {
+  content: '✦';
+  position: absolute;
+  top: -6px;
+  left: 14px;
+  font-size: 10px;
+  color: var(--color-warm-yellow, #fbbf24);
+  opacity: 0.4;
 }
 
 .about-section-title {
@@ -75,8 +126,9 @@
   top: 8px;
   bottom: 8px;
   width: 4px;
-  background: var(--color-primary, #1677ff);
+  background: var(--warm-gradient, linear-gradient(to bottom, #fbbf24, #f97316));
   border-radius: 2px;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.2);
 }
 
 .about-description {
@@ -130,6 +182,12 @@
   border: 1px solid var(--border-color-light, #f0f0f0);
   border-radius: var(--radius-md, 8px);
   padding: 16px 20px;
+  transition: border-color var(--transition-base, 250ms ease), box-shadow var(--transition-base, 250ms ease);
+}
+
+.about-contact-card:hover {
+  border-color: var(--color-warm-yellow, #fbbf24);
+  box-shadow: 0 2px 12px rgba(251, 191, 36, 0.1);
 }
 
 .about-contact-card .ant-descriptions-item-label {

@@ -1,14 +1,24 @@
-import { Typography, Divider, Button } from 'antd'
-import { FireOutlined, GithubOutlined } from '@ant-design/icons'
+import { Typography, Divider, Button, Tag } from 'antd'
+import { FireOutlined, GithubOutlined, TagsOutlined, EditOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { getAllPosts } from '../utils/posts'
+import { getAllPosts, getAllTags } from '../utils/posts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { formatDate } from '../utils/formatDate'
+import { getTagColor } from '../utils/tagColors'
 import ArticleCard from '../components/ArticleCard'
+import StarIcon from '../components/Icons/StarIcon'
+import CuteStarIcon from '../components/Icons/CuteStarIcon'
+import MoonIcon from '../components/Icons/MoonIcon'
+import CloverIcon from '../components/Icons/CloverIcon'
+import RocketIcon from '../components/Icons/RocketIcon'
 import './Home.css'
 
 function Home() {
   const posts = getAllPosts()
+  const tags = getAllTags()
   const navigate = useNavigate()
+  const pinnedPosts = posts.filter(p => p.pinned)
+  const regularPosts = posts.filter(p => !p.pinned)
 
   useDocumentTitle("Liubai's Blog")
 
@@ -37,19 +47,77 @@ function Home() {
         <div className="home-hero-decoration">
           <div className="home-hero-shape home-hero-shape-1" />
           <div className="home-hero-shape home-hero-shape-2" />
+          <StarIcon size={20} className="home-hero-star home-hero-star-1" />
+          <StarIcon size={14} className="home-hero-star home-hero-star-2" />
+          <MoonIcon size={28} className="home-hero-moon" />
+          <CloverIcon size={16} className="home-hero-clover" />
+          <RocketIcon size={22} className="home-hero-rocket" />
         </div>
       </div>
 
-      <div className="home-header">
-        <Typography.Title level={2} className="home-title">最新文章</Typography.Title>
+      <div className="home-stats">
+        <div className="home-stat-item">
+          <EditOutlined /> <span className="home-stat-num">{posts.length}</span> 篇文章
+        </div>
+        <div className="home-stat-dot" />
+        <div className="home-stat-item">
+          <TagsOutlined /> <span className="home-stat-num">{tags.length}</span> 个标签
+        </div>
+      </div>
+
+      {pinnedPosts.length > 0 && (
+        <>
+          <div className="home-section-header">
+            <StarIcon size={20} className="home-section-star" />
+            <Typography.Title level={2} className="home-title">
+              精选推荐
+            </Typography.Title>
+          </div>
+          <Divider className="home-divider" />
+          {pinnedPosts.map(post => (
+            <ArticleCard key={post.slug} {...post} />
+          ))}
+        </>
+      )}
+
+      <div className="home-section-header" style={pinnedPosts.length > 0 ? { marginTop: 28 } : undefined}>
+        <StarIcon size={20} className="home-section-star" />
+        <Typography.Title level={2} className="home-title">
+          最近更新
+        </Typography.Title>
         <Typography.Text className="home-subtitle" type="secondary">
-          共 {posts.length} 篇
+          {regularPosts.length} 篇
         </Typography.Text>
       </div>
-      <Divider />
-      {posts.map(post => (
-        <ArticleCard key={post.slug} {...post} />
-      ))}
+      <Divider className="home-divider" />
+
+      <div className="home-feed">
+        {regularPosts.map((post, index) => (
+          <article
+            key={post.slug}
+            className="home-feed-item"
+            style={{ animationDelay: `${index * 0.05}s` }}
+            onClick={() => navigate(`/article/${post.slug}`)}
+          >
+            <CuteStarIcon size={12} className="home-feed-star" />
+            <div className="home-feed-left">
+              <span className="home-feed-date">{formatDate(post.date)}</span>
+            </div>
+            <div className="home-feed-right">
+              <h3 className="home-feed-title">{post.title}</h3>
+              <p className="home-feed-desc">{post.description}</p>
+              <div className="home-feed-tags">
+                {post.tags.map(tag => {
+                  const { accent, bg } = getTagColor(tag)
+                  return (
+                    <Tag key={tag} className="home-feed-tag" style={{ color: accent, background: bg, borderColor: `${accent}33` }}>{tag}</Tag>
+                  )
+                })}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   )
 }

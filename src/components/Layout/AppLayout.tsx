@@ -4,6 +4,7 @@ import { VerticalAlignTopOutlined } from '@ant-design/icons'
 import { Outlet, useLocation } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import AppFooter from './AppFooter'
+import FloatingStars from '../FloatingStars'
 import './AppLayout.css'
 
 const { Content } = Layout
@@ -17,7 +18,8 @@ function AppLayout() {
 
   return (
     <Layout className="app-layout">
-    <AppHeader />
+      <FloatingStars />
+      <AppHeader />
       <Content className="app-content">
         <div className="app-content-inner" id="main-content">
           <Outlet />

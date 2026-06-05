@@ -3,6 +3,49 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 200px);
+  position: relative;
+}
+
+.not-found-decoration {
+  position: relative;
+  width: 100px;
+  height: 60px;
+  margin: 0 auto 16px;
+}
+
+.not-found-star {
+  position: absolute;
+  pointer-events: none;
+  animation: starFloat 4s ease-in-out infinite;
+}
+
+.not-found-star-1 {
+  top: 0;
+  left: 10px;
+  animation-delay: 0s;
+}
+
+.not-found-star-2 {
+  top: 15px;
+  right: 5px;
+  animation-delay: 1s;
+}
+
+.not-found-moon {
+  position: absolute;
+  top: -5px;
+  right: 20px;
+  pointer-events: none;
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
+.not-found-rocket {
+  position: absolute;
+  top: 10px;
+  left: -10px;
+  pointer-events: none;
+  animation: rocketFloat 4s ease-in-out infinite;
+  animation-delay: 0.5s;
 }
 
 .not-found-emoji {
@@ -15,11 +58,21 @@
 .not-found-title {
   font-size: 72px !important;
   font-weight: 700 !important;
-  background: var(--not-found-title-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   margin-bottom: 8px !important;
+  line-height: 1.2;
+}
+
+.not-found-title span {
+  display: inline-block;
+  transition: transform var(--transition-base, 250ms ease);
+}
+
+.not-found-title span:hover {
+  transform: scale(1.1);
+}
+
+.not-found-title span:nth-child(2):hover {
+  animation: starTwinkle 0.6s ease-in-out;
 }
 
 .not-found-subtitle {

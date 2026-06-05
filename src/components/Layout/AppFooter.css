@@ -51,6 +51,14 @@
   gap: 2px;
 }
 
+.footer-star {
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.footer-clover {
+  animation: starFloat 5s ease-in-out infinite;
+}
+
 .footer-icon-gitee {
   color: var(--color-red);
 }

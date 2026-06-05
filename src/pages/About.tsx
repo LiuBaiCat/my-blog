@@ -1,25 +1,28 @@
 import { Typography, Descriptions, Avatar, Tag } from "antd";
-import { GithubOutlined, CodeOutlined } from "@ant-design/icons";
+import { GithubOutlined } from "@ant-design/icons";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import StarIcon from "../components/Icons/StarIcon";
+import MoonIcon from "../components/Icons/MoonIcon";
+import RocketIcon from "../components/Icons/RocketIcon";
 import "./About.css";
 
 const { Title, Paragraph } = Typography;
 
 const skillGroups = [
   {
-    title: "前端",
+    title: "⚛️ 前端",
     color: "blue",
-    skills: ["HTML/CSS", "JavaScript", "React", "TypeScript", "Vue"],
+    skills: ["🌐 HTML/CSS", "📜 JavaScript", "⚛️ React", "🔷 TypeScript", "💚 Vue"],
   },
   {
-    title: "后端",
+    title: "☕ 后端",
     color: "green",
-    skills: ["Java", "Spring Boot", "MyBatis", "MySQL", "Node.js"],
+    skills: ["☕ Java", "🍃 Spring Boot", "🗃️ MyBatis", "🐬 MySQL", "🟢 Node.js"],
   },
   {
-    title: "工具",
+    title: "🛠️ 工具",
     color: "purple",
-    skills: ["Git", "Webpack", "Vite", "Docker", "Linux"],
+    skills: ["📦 Git", "📦 Webpack", "⚡ Vite", "🐳 Docker", "🐧 Linux"],
   },
 ]
 
@@ -29,6 +32,10 @@ function About() {
   return (
     <div className="about-page">
       <div className="about-hero">
+        <StarIcon size={18} className="about-hero-star about-hero-star-1" />
+        <StarIcon size={12} className="about-hero-star about-hero-star-2" />
+        <MoonIcon size={24} className="about-hero-moon" />
+        <RocketIcon size={20} className="about-hero-rocket" />
         <Avatar
           size={96}
           className="about-avatar"
@@ -63,7 +70,7 @@ function About() {
           {skillGroups.map(group => (
             <div key={group.title} className="about-skill-group">
               <div className="about-skill-group-title">
-                <CodeOutlined /> {group.title}
+                {group.title}
               </div>
               <div className="about-skill-tags">
                 {group.skills.map(skill => (

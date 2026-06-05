@@ -5,8 +5,12 @@ import { CalendarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons
 import { getPostBySlug, getPostContent, getAdjacentPosts } from '../utils/posts'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import { formatDate } from '../utils/formatDate'
+import { getTagColor } from '../utils/tagColors'
 import TableOfContents from '../components/TableOfContents'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import StarIcon from '../components/Icons/StarIcon'
+import MoonIcon from '../components/Icons/MoonIcon'
+import RocketIcon from '../components/Icons/RocketIcon'
 import './ArticleDetail.css'
 
 const { Title } = Typography
@@ -75,22 +79,32 @@ function ArticleDetail() {
     <article className={`article-detail toc-${tocPosition}`}>
       <div className="article-detail-main">
         <div className="article-detail-hero">
-          <Button
-            type="text"
-            icon={<LeftOutlined />}
-            onClick={() => navigate('/')}
-            className="article-detail-back-btn"
-          >
-            返回首页
-          </Button>
+          <div className="article-detail-hero-top">
+            <Button
+              type="text"
+              icon={<LeftOutlined />}
+              onClick={() => navigate('/')}
+              className="article-detail-back-btn"
+            >
+              返回首页
+            </Button>
+            <div className="article-detail-decoration">
+              <StarIcon size={14} className="article-detail-star" />
+              <MoonIcon size={18} className="article-detail-moon" />
+              <RocketIcon size={16} className="article-detail-rocket" />
+            </div>
+          </div>
           <Title className="article-detail-title">{post.title}</Title>
           <div className="article-detail-meta">
             <span className="article-detail-date">
               <CalendarOutlined /> {formatDate(post.date)}
             </span>
-            {post.tags.map(tag => (
-              <Tag key={tag} color="blue">{tag}</Tag>
-            ))}
+            {post.tags.map(tag => {
+              const { accent, bg } = getTagColor(tag)
+              return (
+                <Tag key={tag} style={{ color: accent, background: bg, borderColor: `${accent}33` }}>{tag}</Tag>
+              )
+            })}
           </div>
         </div>
         <Divider />

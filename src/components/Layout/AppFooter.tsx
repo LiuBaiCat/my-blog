@@ -1,6 +1,8 @@
 import { memo } from 'react'
 import { Layout } from 'antd'
 import { GithubOutlined, HeartFilled } from '@ant-design/icons'
+import StarIcon from '../Icons/StarIcon'
+import CloverIcon from '../Icons/CloverIcon'
 import './AppFooter.css'
 
 const { Footer } = Layout
@@ -33,7 +35,8 @@ function AppFooter() {
         <span className="footer-copyright">
           Liubai's Blog &copy; {CURRENT_YEAR}
         </span>
-        <span className="footer-separator">|</span>
+        <StarIcon size={10} className="footer-star" />
+        <CloverIcon size={10} className="footer-clover" />
         <span className="footer-powered">
           Powered with <HeartFilled className="footer-icon-heart" />
         </span>

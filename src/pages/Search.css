@@ -2,8 +2,57 @@
   padding-top: 4px;
 }
 
+.search-decoration {
+  position: relative;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.search-star {
+  position: absolute;
+  pointer-events: none;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+.search-star-1 {
+  left: 20%;
+  top: 5px;
+  animation-delay: 0s;
+}
+
+.search-star-2 {
+  right: 25%;
+  top: 10px;
+  animation-delay: 1s;
+}
+
+.search-moon {
+  position: absolute;
+  right: 15%;
+  top: 0;
+  pointer-events: none;
+  animation: moonGlow 4s ease-in-out infinite;
+}
+
+.search-rocket {
+  position: absolute;
+  left: 15%;
+  top: 5px;
+  pointer-events: none;
+  animation: rocketFloat 4s ease-in-out infinite;
+}
+
 .search-input {
   margin-bottom: 24px;
+}
+
+.search-input .ant-input-search-button {
+  border-start-end-radius: var(--radius-sm);
+  border-end-end-radius: var(--radius-sm);
+}
+
+.search-input .ant-input-affix-wrapper-focused {
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.15), 0 0 0 2px var(--color-primary-light);
 }
 
 .search-results-header {
@@ -19,16 +68,37 @@
 
 .search-result-card {
   margin-bottom: 14px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md, 14px);
   border: 1px solid var(--border-color-light, #f0f0f0);
   transition: all var(--transition-base, 250ms ease);
   cursor: pointer;
   overflow: hidden;
+  position: relative;
+}
+
+/* 卡片左侧暖色小竖条 */
+.search-result-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  background: var(--warm-gradient, linear-gradient(to bottom, #fbbf24, #f97316));
+  opacity: 0;
+  transition: opacity var(--transition-base, 250ms ease), top var(--transition-base, 250ms ease), bottom var(--transition-base, 250ms ease);
+  border-radius: 1px;
+}
+
+.search-result-card:hover::before {
+  opacity: 0.6;
+  top: 10%;
+  bottom: 10%;
 }
 
 .search-result-card:hover {
   border-color: var(--color-primary, #1677ff);
-  box-shadow: var(--shadow-md, 0 4px 12px 0 rgba(0, 0, 0, 0.06));
+  box-shadow: var(--shadow-md, 0 4px 12px 0 rgba(0, 0, 0, 0.06)), 0 0 16px rgba(251, 191, 36, 0.08);
 }
 
 .search-result-card:focus-visible {
@@ -67,4 +137,36 @@
 
 .search-empty {
   margin-top: 48px;
+  text-align: center;
+}
+
+.search-empty-icon {
+  font-size: 40px;
+  color: var(--color-warm-yellow, #fbbf24);
+  margin-bottom: 16px;
+  animation: starFloat 4s ease-in-out infinite;
+  position: relative;
+  display: inline-block;
+}
+
+.search-empty-icon::after {
+  content: '✦';
+  position: absolute;
+  top: -8px;
+  right: -16px;
+  font-size: 14px;
+  color: var(--color-warm-orange, #f97316);
+  opacity: 0.6;
+  animation: starTwinkle 2s ease-in-out infinite;
+}
+
+.search-empty-text {
+  font-size: 15px;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 8px;
+}
+
+.search-empty-hint {
+  font-size: 13px;
+  color: var(--text-tertiary, #9ca3af);
 }

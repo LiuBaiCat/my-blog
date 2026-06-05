@@ -20,14 +20,14 @@
   --border-color-light: #f0f0f0;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 8px rgba(22, 119, 255, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(22, 119, 255, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-header: 0 2px 12px rgba(22, 119, 255, 0.08);
 
   /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -75,6 +75,21 @@
   --year-title-gradient: linear-gradient(to bottom, var(--color-primary), #4096ff);
   --archive-link-hover: #4096ff;
 
+  /* Cute boy style - accent colors */
+  --color-warm-yellow: #fbbf24;
+  --color-warm-orange: #f97316;
+  --color-soft-purple: #a78bfa;
+  --color-star: #fbbf24;
+  --color-moon: #fcd34d;
+  --color-clover: #34d399;
+  --color-rocket: #60a5fa;
+
+  /* Decorative gradients */
+  --hero-star-bg: radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.12) 0%, transparent 50%);
+  --hero-moon-bg: radial-gradient(circle at 80% 20%, rgba(252, 211, 77, 0.1) 0%, transparent 40%);
+  --warm-gradient: linear-gradient(135deg, #fbbf24, #f97316);
+  --sunset-glow: radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 60%);
+
   /* Misc */
   --color-success: #52c41a;
   --color-gold: #faad14;
@@ -104,9 +119,9 @@
   --border-color-light: #262640;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(64, 150, 255, 0.1), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(64, 150, 255, 0.12), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-header: 0 2px 12px rgba(64, 150, 255, 0.1);
 
   /* Surfaces */
   --bg-header: rgba(22, 22, 42, 0.95);
@@ -139,6 +154,21 @@
   --not-found-title-gradient: linear-gradient(135deg, #4096ff, #1677ff);
   --year-title-gradient: linear-gradient(to bottom, var(--color-primary), #1677ff);
   --archive-link-hover: #1677ff;
+
+  /* Cute boy style - accent colors (dark) */
+  --color-warm-yellow: #fcd34d;
+  --color-warm-orange: #fb923c;
+  --color-soft-purple: #c4b5fd;
+  --color-star: #fcd34d;
+  --color-moon: #fde68a;
+  --color-clover: #6ee7b7;
+  --color-rocket: #93c5fd;
+
+  /* Decorative gradients (dark) */
+  --hero-star-bg: radial-gradient(circle at 20% 30%, rgba(252, 211, 77, 0.08) 0%, transparent 50%);
+  --hero-moon-bg: radial-gradient(circle at 80% 20%, rgba(253, 230, 138, 0.06) 0%, transparent 40%);
+  --warm-gradient: linear-gradient(135deg, #fcd34d, #fb923c);
+  --sunset-glow: radial-gradient(circle at 50% 0%, rgba(252, 211, 77, 0.06) 0%, transparent 60%);
 
   /* Misc */
   --color-success: #52c41a;
