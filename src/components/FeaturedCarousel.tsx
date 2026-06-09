@@ -42,7 +42,7 @@ export default function FeaturedCarousel({ posts }: Props) {
 
   if (posts.length === 0) return null
 
-  const showNav = posts.length >= 3
+  const showNav = posts.length >= 2
 
   return (
     <div className={`featured-carousel${showNav ? '' : ' simple-mode'}`}>
