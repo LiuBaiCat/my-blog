@@ -331,6 +331,23 @@
   }
 }
 
+/* ===== Pagination ===== */
+
+.home-pagination {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 8px;
+}
+
+/* ===== Empty feed state ===== */
+
+.home-feed-empty {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
 @media (max-width: 768px) {
   .home-hero {
     padding: 28px 20px;
@@ -362,5 +379,8 @@
   .home-feed-item:hover {
     margin-left: 0;
     padding-left: 8px;
+  }
+  .home-pagination {
+    padding: 20px 0 4px;
   }
 }

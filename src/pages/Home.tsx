@@ -1,11 +1,11 @@
-import { Typography, Divider, Button, Tag } from 'antd'
+import { Typography, Divider, Button, Tag, Pagination } from 'antd'
 import { FireOutlined, GithubOutlined, TagsOutlined, EditOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getAllPosts, getAllTags } from '../utils/posts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatDate } from '../utils/formatDate'
 import { getTagColor } from '../utils/tagColors'
-import ArticleCard from '../components/ArticleCard'
+import FeaturedCarousel from '../components/FeaturedCarousel'
 import StarIcon from '../components/Icons/StarIcon'
 import CuteStarIcon from '../components/Icons/CuteStarIcon'
 import MoonIcon from '../components/Icons/MoonIcon'
@@ -13,12 +13,26 @@ import CloverIcon from '../components/Icons/CloverIcon'
 import RocketIcon from '../components/Icons/RocketIcon'
 import './Home.css'
 
+const PAGE_SIZE = 8
+
 function Home() {
   const posts = getAllPosts()
   const tags = getAllTags()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const pinnedPosts = posts.filter(p => p.pinned)
   const regularPosts = posts.filter(p => !p.pinned)
+
+  const currentPage = (() => {
+    const raw = Number(searchParams.get('page'))
+    return Number.isFinite(raw) && raw >= 1 ? Math.floor(raw) : 1
+  })()
+  const totalPages = Math.ceil(regularPosts.length / PAGE_SIZE)
+  const safePage = Math.min(currentPage, Math.max(totalPages, 1))
+  const pagePosts = regularPosts.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  )
 
   useDocumentTitle("Liubai's Blog")
 
@@ -77,13 +91,11 @@ function Home() {
             </Typography.Text>
           </div>
           <Divider className="home-divider" />
-          {pinnedPosts.map(post => (
-            <ArticleCard key={post.slug} {...post} />
-          ))}
+          <FeaturedCarousel posts={pinnedPosts} />
         </>
       )}
 
-      <div className="home-section-header" style={pinnedPosts.length > 0 ? { marginTop: 28 } : undefined}>
+      <div className="home-section-header" id="home-recent-section" style={pinnedPosts.length > 0 ? { marginTop: 28 } : undefined}>
         <StarIcon size={20} className="home-section-star" />
         <Typography.Title level={2} className="home-title">
           最近更新
@@ -94,33 +106,54 @@ function Home() {
       </div>
       <Divider className="home-divider" />
 
-      <div className="home-feed">
-        {regularPosts.map((post, index) => (
-          <article
-            key={post.slug}
-            className="home-feed-item"
-            style={{ animationDelay: `${index * 0.05}s` }}
-            onClick={() => navigate(`/article/${post.slug}`)}
-          >
-            <CuteStarIcon size={12} className="home-feed-star" />
-            <div className="home-feed-left">
-              <span className="home-feed-date">{formatDate(post.date)}</span>
+      {pagePosts.length > 0 ? (
+        <>
+          <div className="home-feed">
+            {pagePosts.map((post, index) => (
+              <article
+                key={post.slug}
+                className="home-feed-item"
+                style={{ animationDelay: `${index * 0.05}s` }}
+                onClick={() => navigate(`/article/${post.slug}`)}
+              >
+                <CuteStarIcon size={12} className="home-feed-star" />
+                <div className="home-feed-left">
+                  <span className="home-feed-date">{formatDate(post.date)}</span>
+                </div>
+                <div className="home-feed-right">
+                  <h3 className="home-feed-title">{post.title}</h3>
+                  <p className="home-feed-desc">{post.description}</p>
+                  <div className="home-feed-tags">
+                    {post.tags.map(tag => {
+                      const { accent, bg } = getTagColor(tag)
+                      return (
+                        <Tag key={tag} className="home-feed-tag" style={{ color: accent, background: bg, borderColor: `${accent}33` }}>{tag}</Tag>
+                      )
+                    })}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          {regularPosts.length > PAGE_SIZE && (
+            <div className="home-pagination">
+              <Pagination
+                current={safePage}
+                total={regularPosts.length}
+                pageSize={PAGE_SIZE}
+                onChange={(page) => {
+                  setSearchParams(page > 1 ? { page: String(page) } : {})
+                  document.getElementById('home-recent-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                showSizeChanger={false}
+                showTotal={(total, range) => `第 ${range[0]}-${range[1]} 篇 / 共 ${total} 篇`}
+              />
             </div>
-            <div className="home-feed-right">
-              <h3 className="home-feed-title">{post.title}</h3>
-              <p className="home-feed-desc">{post.description}</p>
-              <div className="home-feed-tags">
-                {post.tags.map(tag => {
-                  const { accent, bg } = getTagColor(tag)
-                  return (
-                    <Tag key={tag} className="home-feed-tag" style={{ color: accent, background: bg, borderColor: `${accent}33` }}>{tag}</Tag>
-                  )
-                })}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+          )}
+        </>
+      ) : (
+        <div className="home-feed-empty">暂无更多文章</div>
+      )}
     </div>
   )
 }

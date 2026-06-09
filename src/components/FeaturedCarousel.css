@@ -1,0 +1,177 @@
+.featured-carousel {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+/* ---- Scroll track ---- */
+
+.featured-carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0 8px;
+}
+
+.featured-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.featured-carousel-item {
+  flex: 0 0 calc(50% - 7px);
+  scroll-snap-align: start;
+  min-width: 0;
+  display: flex;
+}
+
+.featured-carousel-item .article-card {
+  height: 100%;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.featured-carousel-item .ant-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-carousel-item .ant-card-meta-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-carousel-item .article-card-tags {
+  margin-top: auto;
+}
+
+/* ---- Edge fade overlays ---- */
+
+.featured-carousel-edge {
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  width: 48px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.featured-carousel-edge.left {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-body), transparent);
+}
+
+.featured-carousel-edge.right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-body), transparent);
+}
+
+/* ---- Arrow buttons ---- */
+
+.featured-carousel-arrow {
+  position: absolute;
+  top: calc(50% - 18px - 4px);
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.featured-carousel-arrow:hover {
+  background: var(--color-primary);
+  color: #fff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.featured-carousel-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.featured-carousel-arrow.prev {
+  left: 4px;
+}
+
+.featured-carousel-arrow.next {
+  right: 4px;
+}
+
+/* ---- Dot indicators ---- */
+
+.featured-carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+  padding: 10px 0 2px;
+}
+
+.featured-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--border-color);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+
+.featured-carousel-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--color-primary);
+}
+
+.featured-carousel-dot:hover:not(.active) {
+  background: var(--color-primary);
+  opacity: 0.5;
+}
+
+/* ---- Simple mode (1-2 posts, no carousel) ---- */
+
+.featured-carousel.simple-mode .featured-carousel-track {
+  scroll-snap-type: none;
+}
+
+.featured-carousel.simple-mode .featured-carousel-edge {
+  display: none;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+  .featured-carousel-item {
+    flex: 0 0 calc(100% - 72px);
+  }
+
+  .featured-carousel.simple-mode .featured-carousel-item {
+    flex: 0 0 100%;
+  }
+
+  .featured-carousel-edge {
+    display: none;
+  }
+
+  .featured-carousel-arrow {
+    display: none;
+  }
+
+  .featured-carousel-dots {
+    padding: 6px 0 0;
+  }
+}
