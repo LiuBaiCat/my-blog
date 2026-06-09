@@ -1,13 +1,11 @@
 ---
 title: screen常见指令
-date: 2026-06-08
+date: 2025-12-15
 tags: ["screen", "指令"]
 description: "screen常见指令"
 ---
 
-screen常见指令
-
-会话管理:
+# 1.会话管理
 
 ```bash
   screen -S <name>      # 启动命名会话
@@ -16,7 +14,7 @@ screen常见指令
   Ctrl+a d              # 分离会话
 ```
 
-窗口管理:
+# 2.窗口管理
 
 ```bash
   Ctrl+a c              # 创建新窗口
@@ -26,7 +24,7 @@ screen常见指令
   Ctrl+a k              # 关闭窗口
 ```
 
-滚动与复制:
+# 3.滚动与复制
 
 ```bash
   Ctrl+a [              # 进入复制模式（用于滚动历史输出）
@@ -35,7 +33,7 @@ screen常见指令
   Ctrl+a ]              # 粘贴文本
 ```
 
-分屏:
+# 4.分屏
 
 ```bash
   Ctrl+a S              # 水平分屏
