@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Typography, Tag, Divider, Result, Button, Spin } from 'antd'
-import { CalendarOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { CalendarOutlined, HomeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { getPostBySlug, getPostContent, getAdjacentPosts } from '../utils/posts'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import { formatDate } from '../utils/formatDate'
@@ -80,14 +81,6 @@ function ArticleDetail() {
       <div className="article-detail-main">
         <div className="article-detail-hero">
           <div className="article-detail-hero-top">
-            <Button
-              type="text"
-              icon={<LeftOutlined />}
-              onClick={() => navigate('/')}
-              className="article-detail-back-btn"
-            >
-              返回首页
-            </Button>
             <div className="article-detail-decoration">
               <StarIcon size={14} className="article-detail-star" />
               <MoonIcon size={18} className="article-detail-moon" />
@@ -138,6 +131,17 @@ function ArticleDetail() {
         position={tocPosition}
         onTogglePosition={handleTogglePosition}
       />
+      {createPortal(
+        <button
+          className="article-floating-home-btn"
+          onClick={() => navigate('/')}
+          title="返回首页"
+          aria-label="返回首页"
+        >
+          <HomeOutlined />
+        </button>,
+        document.body
+      )}
     </article>
   )
 }

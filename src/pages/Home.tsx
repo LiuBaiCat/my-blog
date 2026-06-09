@@ -72,6 +72,9 @@ function Home() {
             <Typography.Title level={2} className="home-title">
               精选推荐
             </Typography.Title>
+            <Typography.Text className="home-subtitle" type="secondary">
+              {pinnedPosts.length} 篇
+            </Typography.Text>
           </div>
           <Divider className="home-divider" />
           {pinnedPosts.map(post => (

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Drawer } from 'antd'
-import { SwapLeftOutlined, SwapRightOutlined, OrderedListOutlined } from '@ant-design/icons'
+import { PicRightOutlined, PicLeftOutlined, OrderedListOutlined } from '@ant-design/icons'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import './TableOfContents.css'
 
@@ -133,7 +133,7 @@ function TableOfContents({ content, position, onTogglePosition }: TableOfContent
             onClick={onTogglePosition}
             title={position === 'right' ? '移至左侧' : '移至右侧'}
           >
-            {position === 'right' ? <SwapLeftOutlined /> : <SwapRightOutlined />}
+            {position === 'right' ? <PicRightOutlined /> : <PicLeftOutlined />}
           </button>
         </div>
         <nav className="toc-nav">

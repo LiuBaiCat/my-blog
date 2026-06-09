@@ -1,8 +1,10 @@
 import { Typography, Input, Tag, Card } from 'antd'
+import { formatDate } from '../utils/formatDate'
 import { CalendarOutlined, SearchOutlined } from '@ant-design/icons'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useMemo } from 'react'
 import { searchPosts } from '../utils/posts'
+import { getTagColor } from '../utils/tagColors'
 import { highlightText } from '../utils/highlight'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import StarIcon from '../components/Icons/StarIcon'
@@ -76,7 +78,7 @@ function Search() {
               {highlightText(post.title, q)}
             </div>
             <div className="search-result-date">
-              <CalendarOutlined /> {post.date}
+              <CalendarOutlined /> {formatDate(post.date)}
             </div>
             <Typography.Paragraph
               type="secondary"
@@ -86,11 +88,12 @@ function Search() {
               {highlightText(post.description, q)}
             </Typography.Paragraph>
             <div className="search-result-tags">
-              {post.tags.map(tag => (
-                <Tag key={tag} color="blue">
-                  {highlightText(tag, q)}
-                </Tag>
-              ))}
+              {post.tags.map(tag => {
+                const { accent, bg } = getTagColor(tag)
+                return (
+                  <Tag key={tag} className="archive-tag" style={{ color: accent, background: bg, borderColor: `${accent}33` }}>{tag}</Tag>
+                )
+              })}
             </div>
           </Card>
         ))

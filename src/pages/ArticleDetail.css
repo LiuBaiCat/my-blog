@@ -19,30 +19,6 @@
   order: 0;
 }
 
-.article-detail-back-btn {
-  padding: 4px 8px;
-  margin-bottom: 8px;
-  margin-left: -8px;
-  color: var(--text-secondary, #6b7280);
-  font-size: 14px;
-  transition: all var(--transition-fast, 150ms ease);
-}
-
-.article-detail-back-btn:hover {
-  color: var(--color-primary, #1677ff) !important;
-  background: var(--color-primary-bg, #f0f5ff) !important;
-  transform: translateX(-2px);
-}
-
-.article-detail-back-btn:active {
-  transform: translateX(-1px);
-}
-
-.article-detail-back-btn:focus-visible {
-  outline: 2px solid var(--color-primary, #1677ff);
-  outline-offset: 2px;
-}
-
 .article-detail-title {
   margin-bottom: 16px !important;
   font-size: 28px !important;
@@ -80,8 +56,9 @@
 .article-detail-hero-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 8px;
+  user-select: none;
 }
 
 .article-detail-decoration {
@@ -195,5 +172,48 @@
   }
   .article-nav-item {
     max-width: 100%;
+  }
+}
+
+/* Floating home button */
+.article-floating-home-btn {
+  position: fixed;
+  bottom: 156px;
+  right: 24px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary, #1677ff);
+  border: none;
+  box-shadow: 0 4px 14px rgba(22, 119, 255, 0.35);
+  cursor: pointer;
+  font-size: 18px;
+  color: #fff;
+  transition: all var(--transition-fast, 150ms ease);
+  animation: homeBtnFadeIn 0.25s ease;
+}
+
+.article-floating-home-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(22, 119, 255, 0.5);
+}
+
+.article-floating-home-btn:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+@keyframes homeBtnFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .article-floating-home-btn {
+    bottom: 146px;
+    right: 24px;
   }
 }
