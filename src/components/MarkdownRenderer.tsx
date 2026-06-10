@@ -1,5 +1,8 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkEmoji from 'remark-emoji'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeRaw from 'rehype-raw'
 import { CopyOutlined, CheckOutlined } from '@ant-design/icons'
@@ -8,7 +11,69 @@ import { useState, useMemo, memo } from 'react'
 import type { Components } from 'react-markdown'
 import { extractTextChildren, generateUniqueId } from '../utils/slugify'
 import DemoFrame from './DemoFrame'
+import MermaidRenderer from './MermaidRenderer'
+import 'katex/dist/katex.min.css'
 import './MarkdownRenderer.css'
+
+/** 将 GitHub 风格的 Alert（> [!NOTE] 等）预处理为 HTML 结构，利用 rehype-raw 传递 */
+function preprocessAlerts(md: string): string {
+  const ALERT_TYPES = ['NOTE', 'WARNING', 'IMPORTANT', 'TIP', 'CAUTION'] as const
+  const ALERT_ICONS: Record<string, string> = {
+    NOTE: '📝',
+    WARNING: '⚠️',
+    IMPORTANT: '❗',
+    TIP: '💡',
+    CAUTION: '🧨',
+  }
+  const pattern = new RegExp(
+    `^> \\[!(${ALERT_TYPES.join('|')})\\]\\s*\\n((?:> .*(?:\\n|$))*)`,
+    'gm'
+  )
+  return md.replace(pattern, (_, type: string, content: string) => {
+    const inner = content
+      .replace(/^> /gm, '')
+      .replace(/\n*$/, '')
+    const icon = ALERT_ICONS[type] || '📝'
+    const label = type.charAt(0) + type.slice(1).toLowerCase()
+    return `<div class="alert alert-${type.toLowerCase()}">` +
+      `<span class="alert-icon">${icon}</span>` +
+      `<div class="alert-body"><span class="alert-title">${label}</span>` +
+      `<div class="markdown-p">${inner}</div></div></div>\n\n`
+  })
+}
+
+/** 在 ReactMarkdown 解析前，将 GFM 脚注语法 [^id] 和 [^id]: content 预处理为 HTML */
+function preprocessFootnotes(md: string): string {
+  const fnMap: Record<string, number> = {}
+  let counter = 0
+
+  // Step 1: 替换脚注定义 [^id]: content（支持多行缩进续行）
+  let result = md.replace(
+    /\[\^(\w+)\]:\s*((?:[^\n]*(?:\n    .*)*)*)/g,
+    (_, id: string, content: string) => {
+      counter++
+      fnMap[id] = counter
+      const inner = content.trim().replace(/\n    /g, '<br>')
+      return (
+        `<div class="footnote-def" id="fn-${id}">` +
+        `<a href="#fnref-${id}" class="footnote-backref">↩</a> ` +
+        `<strong>${counter}.</strong> ${inner}</div>`
+      )
+    }
+  )
+
+  // Step 2: 替换脚注引用 [^id]（已在定义中出现的才替换）
+  result = result.replace(/\[\^(\w+)\]/g, (_: string, id: string) => {
+    const num = fnMap[id]
+    if (!num) return `[^${id}]`
+    return (
+      `<sup class="footnote-ref">` +
+      `<a href="#fn-${id}" id="fnref-${id}">${num}</a></sup>`
+    )
+  })
+
+  return result
+}
 
 const HTML_EXT = /\.html?$/
 
@@ -115,6 +180,9 @@ function MarkdownRenderer({ content }: { content: string }) {
           if (href?.startsWith('/')) {
             return <Link to={href}>{children}</Link>
           }
+          if (href?.startsWith('#')) {
+            return <a href={href}>{children}</a>
+          }
           return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
         },
         img: ({ src, alt }) => (
@@ -124,6 +192,9 @@ function MarkdownRenderer({ content }: { content: string }) {
         pre: ({ children }) => <>{children}</>,
         code: ({ className, children, ...props }) => {
           const match = className?.match(/language-(\S+)/)
+          if (match && match[1] === 'mermaid') {
+            return <MermaidRenderer code={extractTextChildren(children)} />
+          }
           if (match) {
             const language = match[1]
             return (
@@ -153,14 +224,19 @@ function MarkdownRenderer({ content }: { content: string }) {
     }
   }, [content])
 
+  const processedContent = useMemo(
+    () => preprocessAlerts(preprocessFootnotes(content)),
+    [content]
+  )
+
   return (
     <div className="markdown-body">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, fixImageBase, normalizeCodeLang, rehypeHighlight]}
+        remarkPlugins={[remarkGfm, remarkEmoji, remarkMath]}
+        rehypePlugins={[rehypeRaw, fixImageBase, normalizeCodeLang, rehypeKatex, rehypeHighlight]}
         components={components}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   )
