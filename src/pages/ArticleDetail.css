@@ -73,6 +73,7 @@
 
 .article-detail-moon {
   animation: moonGlow 4s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(252, 211, 77, 0.25);
 }
 
 .article-detail-rocket {

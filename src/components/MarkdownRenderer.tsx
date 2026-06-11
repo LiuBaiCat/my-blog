@@ -186,7 +186,7 @@ function MarkdownRenderer({ content }: { content: string }) {
           return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
         },
         img: ({ src, alt }) => (
-          <img src={src} alt={alt ?? ''} loading="lazy" style={{ maxWidth: '100%' }} />
+          <img src={src} alt={alt ?? ''} loading="lazy" decoding="async" style={{ maxWidth: '100%' }} />
         ),
         table: ({ children }) => <div className="table-wrapper"><table>{children}</table></div>,
         pre: ({ children }) => <>{children}</>,
@@ -222,7 +222,7 @@ function MarkdownRenderer({ content }: { content: string }) {
           return <code className="inline-code" {...props}>{children}</code>
         },
     }
-  }, [content])
+  }, [])
 
   const processedContent = useMemo(
     () => preprocessAlerts(preprocessFootnotes(content)),

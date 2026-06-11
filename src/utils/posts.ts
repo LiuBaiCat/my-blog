@@ -67,11 +67,16 @@ function extractBody(raw: string): string {
   return s
 }
 
+const contentCache = new Map<string, string>()
+
 export async function getPostContent(slug: string): Promise<string | null> {
+  if (contentCache.has(slug)) return contentCache.get(slug)!
   const path = Object.keys(contentModules).find(p => slugFromPath(p) === slug)
   if (!path) return null
   const mod = await contentModules[path]()
-  return extractBody(mod.default)
+  const body = extractBody(mod.default)
+  contentCache.set(slug, body)
+  return body
 }
 
 export function searchPosts(keyword: string): PostMeta[] {

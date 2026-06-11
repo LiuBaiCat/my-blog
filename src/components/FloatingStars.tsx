@@ -26,7 +26,9 @@ const COLORS = [
 ]
 const STAR_COUNT = 15
 const PUSH_RADIUS = 140
+const PUSH_RADIUS_SQ = PUSH_RADIUS * PUSH_RADIUS
 const MAX_PUSH = 60
+const WRITE_THRESHOLD = 0.5
 
 function generateStars(): StarParticle[] {
   const w = window.innerWidth
@@ -47,7 +49,8 @@ function generateStars(): StarParticle[] {
 
 export default function FloatingStars() {
   const stars = useMemo(generateStars, [])
-  const starRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const starRefs = useRef<(HTMLDivElement | null)[]>([])
+  const lastPositions = useRef<{ x: number; y: number; rot: number }[]>([])
   const particlesRef = useRef<StarParticle[]>([])
   const mouseRef = useRef({ x: -1000, y: -1000 })
   const rafRef = useRef<number>(0)
@@ -56,6 +59,7 @@ export default function FloatingStars() {
 
   useEffect(() => {
     particlesRef.current = stars.map(s => ({ ...s }))
+    lastPositions.current = new Array(STAR_COUNT)
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY }
@@ -78,6 +82,8 @@ export default function FloatingStars() {
       const h = window.innerHeight
       const { x: mx, y: my } = mouseRef.current
       const particles = particlesRef.current
+      const els = starRefs.current
+      const prev = lastPositions.current
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i]
@@ -93,22 +99,30 @@ export default function FloatingStars() {
 
         const dx = p.x - mx
         const dy = p.y - my
-        const dist = Math.sqrt(dx * dx + dy * dy)
+        const distSq = dx * dx + dy * dy
         let pushX = 0
         let pushY = 0
 
-        if (dist < PUSH_RADIUS && dist > 0) {
+        if (distSq < PUSH_RADIUS_SQ && distSq > 0) {
+          const dist = Math.sqrt(distSq)
           const force = ((PUSH_RADIUS - dist) / PUSH_RADIUS) * MAX_PUSH
-          const angle = Math.atan2(dy, dx)
-          pushX = Math.cos(angle) * force
-          pushY = Math.sin(angle) * force
+          pushX = (dx / dist) * force
+          pushY = (dy / dist) * force
         }
 
         p.rotation += p.rotationSpeed * dt
 
-        const el = starRefs.current.get(p.id)
+        const newX = p.x + pushX
+        const newY = p.y + pushY
+        const lp = prev[i]
+        if (lp && Math.abs(newX - lp.x) < WRITE_THRESHOLD && Math.abs(newY - lp.y) < WRITE_THRESHOLD && Math.abs(p.rotation - lp.rot) < WRITE_THRESHOLD) {
+          continue
+        }
+
+        const el = els[i]
         if (el) {
-          el.style.transform = `translate(${p.x + pushX}px, ${p.y + pushY}px) rotate(${p.rotation}deg)`
+          el.style.transform = `translate(${newX}px, ${newY}px) rotate(${p.rotation}deg)`
+          prev[i] = { x: newX, y: newY, rot: p.rotation }
         }
       }
 
@@ -151,10 +165,7 @@ export default function FloatingStars() {
         <div
           key={star.id}
           className="floating-star"
-          ref={el => {
-            if (el) starRefs.current.set(star.id, el)
-            else starRefs.current.delete(star.id)
-          }}
+          ref={el => { starRefs.current[star.id] = el }}
           style={{
             transform: `translate(${star.x}px, ${star.y}px)`,
             opacity: star.opacity,

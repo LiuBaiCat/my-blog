@@ -62,6 +62,7 @@ function DemoFrame({ src, title }: DemoFrameProps) {
       <div className="demo-frame-iframe">
         <iframe
           src={src}
+          loading="lazy"
           style={{
             width: '100%',
             height: '100%',

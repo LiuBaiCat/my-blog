@@ -36,6 +36,7 @@
   top: -5px;
   right: 20px;
   pointer-events: none;
+  box-shadow: 0 0 12px rgba(252, 211, 77, 0.25);
   animation: moonGlow 4s ease-in-out infinite;
 }
 

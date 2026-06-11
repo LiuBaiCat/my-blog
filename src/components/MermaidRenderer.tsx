@@ -1,16 +1,10 @@
 import { useEffect, useRef, useState, memo } from 'react'
-import mermaid from 'mermaid'
+import type { Mermaid } from 'mermaid'
 
-let initialized = false
-
-function initMermaid(theme: 'default' | 'dark') {
-  mermaid.initialize({
-    startOnLoad: false,
-    theme,
-    securityLevel: 'loose',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif',
-  })
-  initialized = true
+let mermaidPromise: Promise<Mermaid> | null = null
+function loadMermaid(): Promise<Mermaid> {
+  if (!mermaidPromise) mermaidPromise = import('mermaid').then(m => m.default || m)
+  return mermaidPromise
 }
 
 function getTheme(): 'default' | 'dark' {
@@ -28,20 +22,29 @@ const MermaidRenderer = memo(function MermaidRenderer({ code }: MermaidRendererP
   const [svg, setSvg] = useState<string | null>(null)
   const [error, setError] = useState(false)
   const idRef = useRef(`mermaid-${Math.random().toString(36).slice(2, 9)}`)
-  const codeRef = useRef(code)
-  codeRef.current = code
+  const initializedRef = useRef(false)
 
   useEffect(() => {
-    if (!initialized) {
-      initMermaid(getTheme())
-    }
-
     let cancelled = false
     setSvg(null)
     setError(false)
 
-    mermaid.render(idRef.current, code).then(({ svg: result }) => {
-      if (!cancelled) setSvg(result)
+    loadMermaid().then(mermaid => {
+      if (cancelled) return
+
+      if (!initializedRef.current) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: getTheme(),
+          securityLevel: 'loose',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif',
+        })
+        initializedRef.current = true
+      }
+
+      return mermaid.render(idRef.current, code).then(({ svg: result }) => {
+        if (!cancelled) setSvg(result)
+      })
     }).catch(() => {
       if (!cancelled) setError(true)
     })

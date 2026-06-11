@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, memo } from 'react'
 import { createPortal } from 'react-dom'
 import { Drawer } from 'antd'
 import { PicRightOutlined, PicLeftOutlined, OrderedListOutlined } from '@ant-design/icons'
@@ -91,7 +91,7 @@ function renderTree(nodes: TocNode[], activeId: string, onItemClick?: () => void
   )
 }
 
-function TableOfContents({ content, position, onTogglePosition }: TableOfContentsProps) {
+const TableOfContents = memo(function TableOfContents({ content, position, onTogglePosition }: TableOfContentsProps) {
   const [headings, setHeadings] = useState<TocItem[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerNavRef = useRef<HTMLElement>(null)
@@ -163,6 +163,6 @@ function TableOfContents({ content, position, onTogglePosition }: TableOfContent
       </Drawer>
     </>
   )
-}
+})
 
 export default TableOfContents

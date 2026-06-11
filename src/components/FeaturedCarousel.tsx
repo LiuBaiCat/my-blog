@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, memo } from 'react'
 import type { PostMeta } from '../types/blog'
 import ArticleCard from './ArticleCard'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
@@ -8,7 +8,7 @@ interface Props {
   posts: PostMeta[]
 }
 
-export default function FeaturedCarousel({ posts }: Props) {
+const FeaturedCarousel = memo(function FeaturedCarousel({ posts }: Props) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [page, setPage] = useState(0)
   const [cardsPerPage, setCardsPerPage] = useState(2)
@@ -87,4 +87,6 @@ export default function FeaturedCarousel({ posts }: Props) {
       )}
     </div>
   )
-}
+})
+
+export default FeaturedCarousel
