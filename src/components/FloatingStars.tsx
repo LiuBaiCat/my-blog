@@ -24,7 +24,7 @@ const COLORS = [
   '#60a5fa',
   '#93c5fd',
 ]
-const STAR_COUNT = 45
+const STAR_COUNT = 15
 const PUSH_RADIUS = 140
 const MAX_PUSH = 60
 
@@ -52,6 +52,7 @@ export default function FloatingStars() {
   const mouseRef = useRef({ x: -1000, y: -1000 })
   const rafRef = useRef<number>(0)
   const lastTimeRef = useRef<number>(0)
+  const frameCountRef = useRef<number>(0)
 
   useEffect(() => {
     particlesRef.current = stars.map(s => ({ ...s }))
@@ -63,6 +64,12 @@ export default function FloatingStars() {
     document.addEventListener('mousemove', handleMouseMove)
 
     const animate = (time: number) => {
+      frameCountRef.current++
+      if (frameCountRef.current % 2 !== 0) {
+        rafRef.current = requestAnimationFrame(animate)
+        return
+      }
+
       if (!lastTimeRef.current) lastTimeRef.current = time
       const dt = Math.min((time - lastTimeRef.current) / 1000, 0.1)
       lastTimeRef.current = time
@@ -101,19 +108,39 @@ export default function FloatingStars() {
 
         const el = starRefs.current.get(p.id)
         if (el) {
-          el.style.left = `${p.x}px`
-          el.style.top = `${p.y}px`
-          el.style.transform = `translate(${pushX}px, ${pushY}px) rotate(${p.rotation}deg)`
+          el.style.transform = `translate(${p.x + pushX}px, ${p.y + pushY}px) rotate(${p.rotation}deg)`
         }
       }
 
       rafRef.current = requestAnimationFrame(animate)
     }
 
-    rafRef.current = requestAnimationFrame(animate)
+    const start = () => {
+      lastTimeRef.current = 0
+      rafRef.current = requestAnimationFrame(animate)
+    }
+
+    const stop = () => {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) stop()
+      else start()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('blur', stop)
+    window.addEventListener('focus', start)
+
+    if (!document.hidden) start()
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('blur', stop)
+      window.removeEventListener('focus', start)
       cancelAnimationFrame(rafRef.current)
     }
   }, [stars])
@@ -129,8 +156,7 @@ export default function FloatingStars() {
             else starRefs.current.delete(star.id)
           }}
           style={{
-            left: star.x,
-            top: star.y,
+            transform: `translate(${star.x}px, ${star.y}px)`,
             opacity: star.opacity,
           }}
         >

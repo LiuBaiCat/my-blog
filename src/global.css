@@ -63,12 +63,6 @@ body::after {
   opacity: 0.15;
   pointer-events: none;
   z-index: 0;
-  animation: bgFloat 20s ease-in-out infinite;
-}
-
-@keyframes bgFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
 }
 
 #root {
@@ -135,8 +129,8 @@ body::after {
 
 /* 月亮发光动画 */
 @keyframes moonGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(252, 211, 77, 0.3)); }
-  50% { filter: drop-shadow(0 0 8px rgba(252, 211, 77, 0.5)); }
+  0%, 100% { opacity: 0.8; box-shadow: 0 0 8px rgba(252, 211, 77, 0.15); }
+  50% { opacity: 1; box-shadow: 0 0 16px rgba(252, 211, 77, 0.35); }
 }
 
 /* Smooth theme transitions (only during explicit toggle) */
@@ -205,4 +199,20 @@ html.theme-transitioning *::after {
   color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 0;
+}
+
+/* 减少动效偏好 — 禁用所有非必要动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .floating-stars { display: none !important; }
+}
+
+/* 窗口失焦时暂停所有 CSS 动画 — 释放 GPU 资源 */
+html.window-blurred * {
+  animation-play-state: paused !important;
+  transition-duration: 0ms !important;
 }

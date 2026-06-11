@@ -12,5 +12,5 @@
 .floating-star {
   position: absolute;
   pointer-events: none;
-  will-change: transform, left, top;
+  will-change: transform;
 }
