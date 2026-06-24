@@ -61,7 +61,6 @@ pinned: true
     <audio
       controls
       src="./assets_duyi_3/世末歌者.mp3"
-      controls
     ></audio>
     <div class="container">
       <ul class="lyr-list">
