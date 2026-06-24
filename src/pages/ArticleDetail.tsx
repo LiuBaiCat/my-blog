@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Typography, Tag, Divider, Result, Button, Spin } from 'antd'
-import { CalendarOutlined, HomeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { CalendarOutlined, EditOutlined, HomeOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { getPostBySlug, getPostContent, getAdjacentPosts } from '../utils/posts'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import { formatDate } from '../utils/formatDate'
@@ -92,6 +92,11 @@ function ArticleDetail() {
             <span className="article-detail-date">
               <CalendarOutlined /> {formatDate(post.date)}
             </span>
+            {post.updatetime && post.updatetime !== post.date && (
+              <span className="article-detail-updatetime">
+                <EditOutlined /> 更新于 {formatDate(post.updatetime)}
+              </span>
+            )}
             {post.tags.map(tag => {
               const { accent, bg } = getTagColor(tag)
               return (

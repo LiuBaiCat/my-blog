@@ -60,6 +60,9 @@ function About() {
           这是一个自己搭建的个人博客。
           主要用于记录技术学习笔记、项目经验和生活感悟。
         </Paragraph>
+        <Paragraph className="about-since" type="secondary">
+          &nbsp;&nbsp;&nbsp;&nbsp;此网站创建于 2026 年 6 月 4 日
+        </Paragraph>
       </div>
 
       <div className="about-section">

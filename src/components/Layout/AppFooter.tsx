@@ -35,6 +35,8 @@ function AppFooter() {
         <span className="footer-copyright">
           Liubai's Blog &copy; {CURRENT_YEAR}
         </span>
+        <span className="footer-separator">|</span>
+        <span className="footer-since">建于 2026.06.04</span>
         <StarIcon size={10} className="footer-star" />
         <CloverIcon size={10} className="footer-clover" />
         <span className="footer-powered">

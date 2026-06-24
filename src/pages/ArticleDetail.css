@@ -43,6 +43,15 @@
   gap: 4px;
 }
 
+.article-detail-updatetime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-warm-orange);
+  opacity: 0.7;
+}
+
 .article-detail > .ant-divider {
   margin-top: 0;
   margin-bottom: 24px;

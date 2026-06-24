@@ -48,7 +48,7 @@ function generateStars(): StarParticle[] {
 }
 
 export default function FloatingStars() {
-  const stars = useMemo(generateStars, [])
+  const stars = useMemo(() => generateStars(), [])
   const starRefs = useRef<(HTMLDivElement | null)[]>([])
   const lastPositions = useRef<{ x: number; y: number; rot: number }[]>([])
   const particlesRef = useRef<StarParticle[]>([])

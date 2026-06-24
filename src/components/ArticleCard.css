@@ -86,6 +86,19 @@
   line-height: 1.6;
 }
 
+.article-card-updatetime {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--color-warm-orange);
+  opacity: 0.7;
+  line-height: 1;
+}
+
 .article-card-tags {
   display: flex;
   flex-wrap: wrap;

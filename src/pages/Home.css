@@ -306,6 +306,17 @@
   line-height: 1.7;
 }
 
+.home-feed-updatetime {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--color-warm-orange);
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
 .home-feed-right {
   flex: 1;
   min-width: 0;

@@ -1,6 +1,6 @@
 import { Typography, Input, Tag, Card } from 'antd'
 import { formatDate } from '../utils/formatDate'
-import { CalendarOutlined, SearchOutlined } from '@ant-design/icons'
+import { CalendarOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useMemo } from 'react'
 import { searchPosts } from '../utils/posts'
@@ -79,6 +79,11 @@ function Search() {
             </div>
             <div className="search-result-date">
               <CalendarOutlined /> {formatDate(post.date)}
+              {post.updatetime && post.updatetime !== post.date && (
+                <span className="search-result-updatetime">
+                  <EditOutlined /> {formatDate(post.updatetime)}
+                </span>
+              )}
             </div>
             <Typography.Paragraph
               type="secondary"

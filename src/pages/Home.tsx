@@ -119,6 +119,11 @@ function Home() {
                 <CuteStarIcon size={12} className="home-feed-star" />
                 <div className="home-feed-left">
                   <span className="home-feed-date">{formatDate(post.date)}</span>
+                  {post.updatetime && post.updatetime !== post.date && (
+                    <span className="home-feed-updatetime">
+                      <EditOutlined /> {formatDate(post.updatetime)}
+                    </span>
+                  )}
                 </div>
                 <div className="home-feed-right">
                   <h3 className="home-feed-title">{post.title}</h3>

@@ -1,5 +1,5 @@
 import { Card, Tag, Typography } from 'antd'
-import { CalendarOutlined, PushpinOutlined } from '@ant-design/icons'
+import { CalendarOutlined, EditOutlined, PushpinOutlined } from '@ant-design/icons'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { PostMeta } from '../types/blog'
@@ -15,7 +15,7 @@ interface ArticleCardProps extends PostMeta {
   highlight?: string
 }
 
-function ArticleCard({ title, date, tags, description, slug, highlight, pinned }: ArticleCardProps) {
+function ArticleCard({ title, date, tags, description, slug, highlight, pinned, updatetime }: ArticleCardProps) {
   const navigate = useNavigate()
 
   return (
@@ -41,6 +41,11 @@ function ArticleCard({ title, date, tags, description, slug, highlight, pinned }
             <div className="article-card-date">
               {pinned && <PushpinOutlined className="article-card-pin-icon" />}
               <CalendarOutlined /> {formatDate(date)}
+              {updatetime && updatetime !== date && (
+                <span className="article-card-updatetime">
+                  <EditOutlined /> 更新于 {formatDate(updatetime)}
+                </span>
+              )}
             </div>
             <Paragraph
               className="article-card-desc"

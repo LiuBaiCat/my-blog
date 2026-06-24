@@ -1,6 +1,7 @@
 ---
 title: 前端深研(1/5)——事件循环
 date: 2026-05-29
+updatetime: 2026-06-10
 tags: [前端, 事件循环, 面试]
 description: 事件循环是前端开发中一个重要的概念，它负责处理浏览器或 Node.js 中的事件。
 pinned: true

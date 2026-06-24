@@ -6,6 +6,7 @@ interface RawMeta {
   tags?: string[]
   description?: string
   pinned?: boolean
+  updatetime?: Date | string
 }
 
 // Eager: only front-matter (small payload), extracted at build time via `?meta` query
@@ -25,6 +26,12 @@ function slugFromPath(path: string): string {
   return path.split('/').pop()!.replace(/\.md$/, '')
 }
 
+function normalizeDate(raw: Date | string | undefined): string | undefined {
+  if (raw instanceof Date) return raw.toISOString().slice(0, 10)
+  if (raw) return String(raw)
+  return undefined
+}
+
 function parseMeta(path: string, data: RawMeta): PostMeta {
   const rawDate = data.date
   const date = rawDate instanceof Date
@@ -38,6 +45,7 @@ function parseMeta(path: string, data: RawMeta): PostMeta {
     tags: data.tags ?? [],
     description: data.description ?? '',
     pinned: data.pinned === true,
+    updatetime: normalizeDate(data.updatetime),
   }
 }
 

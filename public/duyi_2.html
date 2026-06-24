@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      .ball {
+        width: 100px;
+        height: 100px;
+        background-color: #f40;
+        border-radius: 50%;
+        margin: 30px;
+      }
+      .ball1 {
+        animation: move1 1s infinite ease-in-out;
+      }
+      .ball2 {
+        position: fixed;
+        left: 0;
+        animation: move2 1s infinite ease-in-out;
+      }
+      @keyframes move1 {
+        to {
+          transform: translate(100px);
+        }
+      }
+      @keyframes move2 {
+        to {
+          left: 100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button id="btn">死循环</button>
+    <div class="ball ball1"></div>
+    <div class="ball ball2"></div>
+    <script>
+      function delay(duration) {
+        let startTime = Date.now();
+        while (Date.now() - startTime < duration) {
+          // 空循环，等待 duration 时间
+        }
+      }
+      document.getElementById("btn").onclick = function () {
+        delay(5000);
+      };
+    </script>
+  </body>
+</html>

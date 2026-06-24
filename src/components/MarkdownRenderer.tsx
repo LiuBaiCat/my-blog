@@ -49,11 +49,11 @@ function preprocessFootnotes(md: string): string {
 
   // Step 1: 替换脚注定义 [^id]: content（支持多行缩进续行）
   let result = md.replace(
-    /\[\^(\w+)\]:\s*((?:[^\n]*(?:\n    .*)*)*)/g,
+    /\[\^(\w+)\]:\s*((?:[^\n]*(?:\n {4}.*)*)*)/g,
     (_, id: string, content: string) => {
       counter++
       fnMap[id] = counter
-      const inner = content.trim().replace(/\n    /g, '<br>')
+      const inner = content.trim().replace(/\n {4}/g, '<br>')
       return (
         `<div class="footnote-def" id="fn-${id}">` +
         `<a href="#fnref-${id}" class="footnote-backref">↩</a> ` +

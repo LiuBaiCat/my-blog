@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Typography, Divider, Timeline, Tag } from 'antd'
-import { CalendarOutlined, PushpinOutlined } from '@ant-design/icons'
+import { CalendarOutlined, EditOutlined, PushpinOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { getAllPosts } from '../utils/posts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -62,6 +62,11 @@ function Archive() {
                   <span className="archive-timeline-date">
                     {post.pinned && <PushpinOutlined className="archive-pin-icon-inline" />}
                     {formatDate(post.date)}
+                    {post.updatetime && post.updatetime !== post.date && (
+                      <span className="archive-timeline-updatetime">
+                        <EditOutlined /> {formatDate(post.updatetime)}
+                      </span>
+                    )}
                   </span>
                   <span className="archive-timeline-title">{post.title}</span>
                   {post.pinned && <Tag className="archive-pinned-tag">置顶</Tag>}

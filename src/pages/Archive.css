@@ -106,6 +106,19 @@
   margin-right: 8px;
 }
 
+.archive-timeline-updatetime {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+  padding-left: 6px;
+  border-left: 1px solid var(--border-color);
+  font-size: 11px;
+  color: var(--color-warm-orange);
+  opacity: 0.7;
+  line-height: 1;
+}
+
 .archive-pin-icon {
   color: var(--color-gold);
   font-size: 14px;

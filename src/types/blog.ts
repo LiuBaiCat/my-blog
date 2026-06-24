@@ -5,6 +5,7 @@ export interface PostMeta {
   tags: string[]
   description: string
   pinned?: boolean
+  updatetime?: string
 }
 
 export interface Post extends PostMeta {
