@@ -46,9 +46,6 @@ const FeaturedCarousel = memo(function FeaturedCarousel({ posts }: Props) {
 
   return (
     <div className={`featured-carousel${showNav ? '' : ' simple-mode'}`}>
-      {showNav && <div className="featured-carousel-edge left" aria-hidden />}
-      {showNav && <div className="featured-carousel-edge right" aria-hidden />}
-
       <div
         className="featured-carousel-track"
         ref={trackRef}
@@ -62,14 +59,28 @@ const FeaturedCarousel = memo(function FeaturedCarousel({ posts }: Props) {
       </div>
 
       {showNav && page > 0 && (
-        <button className="featured-carousel-arrow prev" onClick={() => scrollTo(page - 1)} aria-label="上一页">
+        <div
+          className="featured-carousel-edge left"
+          onClick={() => scrollTo(page - 1)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollTo(page - 1); } }}
+          aria-label="上一页"
+        >
           <LeftOutlined />
-        </button>
+        </div>
       )}
       {showNav && page < totalPages - 1 && (
-        <button className="featured-carousel-arrow next" onClick={() => scrollTo(page + 1)} aria-label="下一页">
+        <div
+          className="featured-carousel-edge right"
+          onClick={() => scrollTo(page + 1)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollTo(page + 1); } }}
+          aria-label="下一页"
+        >
           <RightOutlined />
-        </button>
+        </div>
       )}
 
       {showNav && totalPages > 1 && (
