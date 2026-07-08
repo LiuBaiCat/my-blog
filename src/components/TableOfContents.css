@@ -103,25 +103,34 @@
   padding: 0;
 }
 
-/* Ball indicator for active item */
-.toc-item::before {
-  content: '';
+/* Star indicator for active item */
+.toc-star {
   position: absolute;
-  left: 16px;
+  left: 15px;
   top: 50%;
-  transform: translateY(-50%) scale(0);
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--color-primary, #1677ff);
-  border-radius: 50%;
-  background: var(--bg-body, #faf9f8);
-  transition: transform 200ms ease;
+  transform: translateY(-50%);
   pointer-events: none;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
-.toc-item.active::before {
-  transform: translateY(-50%) scale(1);
+.toc-link.active .toc-star {
+  opacity: 1;
+  animation: activeStarTwinkle 2s ease-in-out infinite;
+}
+
+/* Star position per level (align center at 21px = main guide center) */                     
+.toc-link.level-1 .toc-star,                                                                 
+.toc-link.level-2 .toc-star { left: 25px; }                                                 
+.toc-link.level-3 .toc-star { left: 49px; }                                                 
+.toc-link.level-4 .toc-star { left: 73px; }                                                 
+.toc-link.level-5 .toc-star { left: 97px; }                                                 
+.toc-link.level-6 .toc-star { left: 121px; }
+
+@keyframes activeStarTwinkle {
+  0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+  50% { opacity: 0.6; transform: translateY(-50%) scale(0.85); }
 }
 
 .toc-link {
@@ -156,10 +165,65 @@
   background: var(--color-primary-light, #e6f4ff);
 }
 
-/* Level indentation */
-.toc-link.level-2 { padding-left: 40px; }
-.toc-link.level-3 { padding-left: 56px; font-size: 12.5px; }
-.toc-link.level-4 { padding-left: 72px; font-size: 12px; }
+/* Level indentation, weight, and color */
+.toc-link.level-1 {
+  padding-left: 40px;
+  font-weight: 700;
+  color: var(--text-primary, #1a1a2e);
+}
+.toc-link.level-2 {
+  padding-left: 40px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a2e);
+}
+.toc-link.level-3 {
+  padding-left: 64px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+}
+.toc-link.level-4 {
+  padding-left: 88px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-tertiary, #9ca3af);
+}
+.toc-link.level-5 {
+  padding-left: 112px;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--text-tertiary, #9ca3af);
+}
+.toc-link.level-6 {
+  padding-left: 136px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-tertiary, #9ca3af);
+}
+
+/* Horizontal branch lines from main guide to each item */
+.toc-link::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.5px;
+  background: var(--border-color, #e5e7eb);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toc-link.level-2::before { width: 12px; }
+.toc-link.level-3::before { width: 36px; }
+.toc-link.level-4::before { width: 60px; }
+.toc-link.level-5::before { width: 84px; }
+.toc-link.level-6::before { width: 108px; }
+
+.toc-link.active::before {
+  background: var(--color-primary, #1677ff);
+}
 
 /* Floating mobile TOC button */
 .toc-mobile-btn {

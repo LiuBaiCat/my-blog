@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, memo } from 'react'
 import { createPortal } from 'react-dom'
 import { Drawer } from 'antd'
 import { PicRightOutlined, PicLeftOutlined, OrderedListOutlined } from '@ant-design/icons'
+import CuteStarIcon from './Icons/CuteStarIcon'
 import { useScrollSpy } from '../hooks/useScrollSpy'
 import './TableOfContents.css'
 
@@ -78,6 +79,7 @@ function renderTree(nodes: TocNode[], activeId: string, onItemClick?: () => void
               onItemClick?.()
             }}
           >
+            <CuteStarIcon className="toc-star" size={12} color="var(--color-warm-yellow, #fbbf24)" />
             {node.item.text}
           </a>
           {node.children.length > 0 && (

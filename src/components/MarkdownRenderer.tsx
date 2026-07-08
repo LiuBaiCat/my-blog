@@ -156,7 +156,7 @@ function fixImageBase() {
 function MarkdownRenderer({ content }: { content: string }) {
   const components: Components = useMemo(() => {
     const headingIds = new Set<string>()
-    function createHeading(level: 1 | 2 | 3 | 4) {
+    function createHeading(level: 1 | 2 | 3 | 4 | 5 | 6) {
       return ({ children }: { children?: React.ReactNode }) => {
         const text = extractTextChildren(children)
         const id = generateUniqueId(text, headingIds)
@@ -171,6 +171,8 @@ function MarkdownRenderer({ content }: { content: string }) {
         h2: createHeading(2),
         h3: createHeading(3),
         h4: createHeading(4),
+        h5: createHeading(5),
+        h6: createHeading(6),
         a: ({ href, children }) => {
           // 仅对本地 .html 路径使用 DemoFrame（不含协议），外部 .html 链接正常打开
           if (href && !href.includes('://') && HTML_EXT.test(href)) {
