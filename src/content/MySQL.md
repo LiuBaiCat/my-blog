@@ -87,7 +87,7 @@ SELECT DATABASE() ;
 ​		create database [ if not exists ] 数据库名 [ default charset 字符集 ] [ collate 排序规则 ] ;
 
 ```sql
-CREATE DATABASE [ IF NOT EXISTS ] 数据库名 [ DEFAULT CHARSET 字符集 ] [ COLLATE 排序规则 ]
+CREATE DATABASE [ IF NOT EXISTS ] 数据库名 [ DEFAULT CHARSET 字符集 ] [ COLLATE 排序规则 ] ;
 ```
 
 #### **4).** **删除数据库**--drop database
