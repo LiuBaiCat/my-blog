@@ -1,13 +1,13 @@
 ---
-title: Markdown 语法展示
-date: 2077-01-14
+title: 本站 Markdown 渲染样式
+date: 2026-06-04
 updatetime: 2026-06-10
 tags: [markdown, 随笔, 测试]
-description: 一篇展示各种 Markdown 语法的示例文章。
+description: 本站 Markdown 渲染样式与排版效果总览：文本、代码块、表格、公式、图表、提示框等元素的呈现。
 pinned: false
 ---
 
-# Markdown 部分语法展示
+# 本站 Markdown 渲染样式
 
 ## 文本样式
 
