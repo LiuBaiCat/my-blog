@@ -5,7 +5,9 @@ import { getAllPosts, getAllTags } from '../utils/posts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatDate } from '../utils/formatDate'
 import { getTagColor } from '../utils/tagColors'
+import { getNewSlugs, latestActivity } from '../utils/postFreshness'
 import FeaturedCarousel from '../components/FeaturedCarousel'
+import NewBadge from '../components/NewBadge'
 import StarIcon from '../components/Icons/StarIcon'
 import CuteStarIcon from '../components/Icons/CuteStarIcon'
 import MoonIcon from '../components/Icons/MoonIcon'
@@ -14,6 +16,7 @@ import RocketIcon from '../components/Icons/RocketIcon'
 import './Home.css'
 
 const PAGE_SIZE = 8
+const NEW_SLUGS = getNewSlugs(getAllPosts())
 
 function Home() {
   const posts = getAllPosts()
@@ -21,7 +24,9 @@ function Home() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const pinnedPosts = posts.filter(p => p.pinned)
-  const regularPosts = posts.filter(p => !p.pinned)
+  const regularPosts = posts
+    .filter(p => !p.pinned)
+    .sort((a, b) => latestActivity(b).localeCompare(latestActivity(a)))
 
   const currentPage = (() => {
     const raw = Number(searchParams.get('page'))
@@ -126,7 +131,10 @@ function Home() {
                   )}
                 </div>
                 <div className="home-feed-right">
-                  <h3 className="home-feed-title">{post.title}</h3>
+                  <h3 className="home-feed-title">
+                    {post.title}
+                    {NEW_SLUGS.has(post.slug) && <NewBadge />}
+                  </h3>
                   <p className="home-feed-desc">{post.description}</p>
                   <div className="home-feed-tags">
                     {post.tags.map(tag => {

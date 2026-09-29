@@ -6,10 +6,14 @@ import { getAllPosts } from '../utils/posts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatDate, getYear } from '../utils/formatDate'
 import { getTagColor } from '../utils/tagColors'
+import { getNewSlugs } from '../utils/postFreshness'
+import NewBadge from '../components/NewBadge'
 import StarIcon from '../components/Icons/StarIcon'
 import MoonIcon from '../components/Icons/MoonIcon'
 import CloverIcon from '../components/Icons/CloverIcon'
 import './Archive.css'
+
+const NEW_SLUGS = getNewSlugs(getAllPosts())
 
 function Archive() {
   const posts = getAllPosts()
@@ -69,6 +73,7 @@ function Archive() {
                     )}
                   </span>
                   <span className="archive-timeline-title">{post.title}</span>
+                  {NEW_SLUGS.has(post.slug) && <NewBadge />}
                   {post.pinned && <Tag className="archive-pinned-tag">置顶</Tag>}
                   <span className="archive-timeline-tags">
                     {post.tags.map(tag => {
