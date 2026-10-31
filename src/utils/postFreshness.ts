@@ -12,7 +12,9 @@ export function latestActivity(post: PostMeta): string {
 
 /** 距今天数，未来日期或非法日期返回 null */
 function daysAgo(dateStr: string): number | null {
-  const time = new Date(dateStr).getTime()
+  // Vite 的 ?meta 会把日期转换为完整 ISO 字符串，这里只取日期部分并按本地零点解析
+  const dateOnly = dateStr.slice(0, 10)
+  const time = new Date(`${dateOnly}T00:00:00`).getTime()
   if (!Number.isFinite(time)) return null
   const diff = Date.now() - time
   return diff < 0 ? null : diff / DAY_MS
