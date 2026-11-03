@@ -1,15 +1,15 @@
 ---
 title: LangChain 从入门到 AI 私厨 Agent
 date: 2026-11-01
-updatetime: 2026-11-01
+updatetime: 2026-11-03
 tags: [LangChain, AI Agent, LangSmith, DeepSeek, 大模型, Python, 学习笔记]
-description: 黑马程序员 AI 课程 00–27 节完整复习笔记：从 AI 通识、大模型 API、LangChain 的消息、提示词、工具、记忆与结构化输出，一路串到可流式对话、可持久记忆、可上传图片的 AI 私厨 Agent。
+description: 黑马程序员 AI 课程 00–28 节完整复习笔记：从 AI 通识、大模型 API、LangChain 的消息、提示词、工具、记忆与结构化输出，一路串到 AI 私厨 Agent，并补充第 28 节的模型迁移与新版流式 API。
 pinned: false
 ---
 
 # 01. 这次到底学了什么
 
-这份笔记覆盖黑马程序员 AI 课程的第 `00–27` 节，也就是开始学习 LangChain 之前的第一阶段。它包含三条主线：
+这份笔记覆盖黑马程序员 AI 课程的第 `00–28` 节，也就是进入 Agent 进阶之前的第一阶段。它包含三条主线：
 
 1. **AI 通识与底层原理**：人工智能、神经网络、大语言模型分别是什么，它们之间是什么关系；
 2. **大模型 API 与开发环境**：怎样申请模型服务、配置密钥、调用接口，以及为什么 API 本身“不记得”上一轮对话；
@@ -29,6 +29,7 @@ pinned: false
 | 19–20 | 自定义工具与 Tavily | 让模型具备查询外部世界的能力 |
 | 21–23 | 短期记忆、持久化、记忆管理 | 让 Agent 能跨多轮对话并控制上下文 |
 | 24–27 | 需求分析、LangSmith、服务端、OSS、AI 私厨 | 完成一个可以演示的完整 Agent 应用 |
+| 28 | Agent 进阶前的版本升级 | 更新依赖与 DeepSeek 模型配置，认识新版 v3 流式接口 |
 
 这一阶段最重要的认识不是“记住多少 LangChain 函数”，而是建立下面这条链路：
 
@@ -205,9 +206,22 @@ Content-Type: application/json
 
 ## 3.5 模型版本提醒
 
-课程录播中使用的是 `deepseek-chat`，但现在该模型已经升级为 `deepseek-flash`，`deepseek-chat` 后续可能会被废弃。**跟着旧视频写代码时，不能不加判断地继续复制 `deepseek-chat`**；如果控制台提示模型不存在、不可用或已废弃，应首先检查当前账号可用的模型名称，并优先改用 `deepseek-flash`。
+课程早期录制时使用 `deepseek-chat`。第 28 节说明模型服务已经更新，课程示例迁移为 `deepseek-flash`，旧名称后续可能停止提供。模型名、可用性、限流和请求参数都由平台控制，因此应以当前账号控制台和官方文档为准；迁移时不必把所有旧代码机械替换成同一个名称，而要结合当前环境验证。
 
-部分 LangChain 调用，尤其是结构化输出、工具调用等需要额外约束响应格式的场景，直接调用 `deepseek-flash` 可能因为默认开启 thinking 而报错或不兼容。此时应在创建 `ChatDeepSeek` 时关闭思考：
+第 28 节还通过 `uv sync --upgrade` 更新 LangChain 相关依赖。升级后，模型的初始化方式、工具调用和流式接口都可能发生变化，只改模型名并不足以保证旧代码继续工作。
+
+课程在新版示例中使用 `init_chat_model()`，并通过 `extra_body` 关闭 DeepSeek 的 thinking：
+
+```python
+from langchain.chat_models import init_chat_model
+
+model = init_chat_model(
+    "deepseek-flash",
+    extra_body={"thinking": {"type": "disabled"}},
+)
+```
+
+`ChatDeepSeek` 也可以接收相同的 `extra_body` 配置：
 
 ```python
 from langchain_deepseek import ChatDeepSeek
@@ -218,13 +232,13 @@ model = ChatDeepSeek(
 )
 ```
 
-创建好这个模型后，再把它传给 `create_agent()`。`thinking` 配置放在 `extra_body` 中，是为了把 DeepSeek 特有的请求字段透传给服务端。它不是所有模型平台的通用参数，也不意味着所有普通对话都必须关闭思考；当 LangChain 集成层、工具或结构化输出与默认 thinking 不兼容时，再按当前模型文档显式关闭。
+`thinking` 是 DeepSeek 服务侧的扩展参数，不是 LangChain 或所有 OpenAI 兼容平台的通用参数。课程关闭 thinking，主要是作为兼容性措施：在部分工具调用、结构化输出等场景中，默认 thinking 可能与当前 LangChain 集成不兼容。它不表示所有普通对话都必须关闭思考，是否开启要结合模型、集成包和调用场景判断。
 
-因此，迁移旧代码时应依次检查三件事：
+迁移旧代码时可按下面的顺序排查：
 
-1. 模型名是否已经从 `deepseek-chat` 改为 `deepseek-flash`；
-2. 是否使用了 `ChatDeepSeek`，并需要传入 `extra_body={"thinking": {"type": "disabled"}}`；
-3. 所用 LangChain 和提供商集成包是否支持该参数，必要时查看当前版本源码和官方文档。
+1. 检查当前账号控制台和官方文档中的模型名，确认 `deepseek-chat` 是否仍可用，以及是否应迁移到 `deepseek-flash`；
+2. 检查 LangChain、`langchain-deepseek` 等集成包版本，必要时通过 `uv sync --upgrade` 更新并重新运行最小示例；
+3. 如果工具调用或结构化输出出现 thinking 兼容问题，再传入 `extra_body={"thinking": {"type": "disabled"}}`，不要把它当成所有请求的固定开关。
 
 ## 3.6 最小 API 调用
 
@@ -392,6 +406,27 @@ for chunk, metadata in agent.stream(
 ```
 
 `stream_mode="messages"` 返回“消息片段 + 元数据”的二元组。元数据能帮助判断片段来自哪个节点、哪个模型或哪个工具。
+
+### 5.4.1 第 28 节：新的 `stream_events` v3
+
+第 28 节还演示了 Agent 的新版事件流。它使用 `stream_events(..., version="v3")`，再通过返回对象的 `.messages` 投影读取模型消息：
+
+```python
+from langchain_core.messages import HumanMessage
+
+stream = agent.stream_events(
+    {"messages": [HumanMessage("你好啊~")]},
+    version="v3",
+)
+
+for message in stream.messages:
+    for token in message.text:
+        print(token, end="", flush=True)
+```
+
+在课程使用的 LangChain `1.4.7` 中，`version="v3"` 仍属于实验性 API。v3 返回 `GraphRunStream`，`.messages` 是其中的消息投影，`message.text` 则用于逐段读取文本；接口以后仍可能调整，因此升级 LangChain 后应重新运行示例确认。
+
+调用 v3 时不要再同时传 `stream_mode="messages"`。两者代表不同的流式调用方式，参数混用会产生冲突。AI 私厨项目实际使用的仍是 `agent.stream(..., stream_mode="messages")`，这段现有实现应保留；本节示例用于认识新版接口和后续迁移方向，不需要全局替换项目代码。
 
 ## 5.5 消息类型
 
@@ -1052,10 +1087,10 @@ pre_result = client.presign(
 | 问题 | 原因 | 改进 |
 | --- | --- | --- |
 | 模型名不存在 | SDK、平台或模型版本不一致 | 以当前账号控制台和服务文档为准 |
-| 照抄旧视频使用 `deepseek-chat` | 该名称属于旧模型，后续可能废弃 | 优先迁移到 `deepseek-flash` |
+| 直接照抄旧视频的模型名 | 课程录制时的模型名可能与当前平台不同，后续也可能停止提供 | 核对控制台与文档，按当前环境验证并迁移 |
 | 401 / 鉴权失败 | 密钥未加载、复制不完整或环境不对 | 检查 `.env`、变量名和请求域名 |
 | 连接地址错误 | 混淆 OpenAI 官方与兼容服务地址 | 同时检查 `base_url`、提供商和模型名 |
-| `deepseek-flash` 在工具或结构化输出调用中报错 | 默认 thinking 与当前调用方式不兼容 | 使用 `extra_body={"thinking": {"type": "disabled"}}` 关闭思考 |
+| `deepseek-flash` 在工具或结构化输出调用中报错 | 默认 thinking 可能与当前 LangChain 集成不兼容 | 在确认场景需要后，用 `extra_body={"thinking": {"type": "disabled"}}` 关闭思考 |
 | 盲目追求低温度 | 以为温度低就不会出错 | 低温度只提高稳定性，不保证事实正确 |
 | 误读 `top_p` | 把概率阈值方向说反 | 低 `top_p` 更聚焦，高 `top_p` 更多样 |
 
@@ -1067,6 +1102,7 @@ pre_result = client.presign(
 | 工具返回对象不可序列化 | Agent 在回传工具结果时失败 | 返回字符串或可序列化结构 |
 | 只打印最后一条消息 | 看不到工具调用过程 | 遍历完整 `messages` |
 | 所有 `AIMessageChunk` 都直接展示 | 前端出现内部规划或空片段 | 过滤类型、内容和非展示元数据 |
+| `stream_events(..., version="v3")` 同时传入 `stream_mode="messages"` | 混用两套流式接口，触发参数冲突 | v3 使用 `.messages` 投影；旧接口才传 `stream_mode` |
 | 把内置 Tool 原样暴露 | 参数太多，模型选择不稳定 | 简单业务用单参数包装 |
 | 结构化输出解析后不再校验 | 类型正确但业务值不可信 | 增加字段范围、来源和业务校验 |
 
@@ -1117,6 +1153,7 @@ allow_origins=["https://your-domain.example"]
 - [ ] 云端模型、本地模型和应用层的职责边界；
 - [ ] LangChain 中模型、消息、提示词、工具和记忆的角色；
 - [ ] `invoke` 与 `stream` 的差异；
+- [ ] `agent.stream(..., stream_mode="messages")` 与 `agent.stream_events(..., version="v3")` 的输入、输出和适用差异；
 - [ ] 一次工具调用产生的 `HumanMessage → AIMessage → ToolMessage → AIMessage`；
 - [ ] Pydantic + `ToolStrategy` 为什么比“提示词要求 JSON”可靠；
 - [ ] Checkpointer 与 `thread_id` 如何形成会话记忆；
@@ -1133,6 +1170,7 @@ allow_origins=["https://your-domain.example"]
 6. 为什么 AI 私厨必须过滤 `AIMessageChunk`？
 7. 为什么 OSS 上传应使用后端签名，而不是把 AccessKey 放进前端？
 8. 为什么允许跨域凭证时不能随意使用 `allow_origins=["*"]`？
+9. 为什么调用 `stream_events(..., version="v3")` 时不应再传 `stream_mode="messages"`？
 
 ## 13.3 最小 Agent 模板
 
@@ -1141,13 +1179,20 @@ allow_origins=["https://your-domain.example"]
 ```python
 from dotenv import load_dotenv
 from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from langchain_core.messages import HumanMessage
 from langchain_tavily import TavilySearch
 from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
+model = init_chat_model(
+    "deepseek-flash",
+    extra_body={"thinking": {"type": "disabled"}},
+)
+
 agent = create_agent(
-    model="deepseek-flash",
+    model=model,
     tools=[TavilySearch(max_results=5)],
     system_prompt=(
         "# 身份\n你是一名严谨的研究助手。\n"
@@ -1158,15 +1203,17 @@ agent = create_agent(
 
 config = {"configurable": {"thread_id": "session-1"}}
 
-for chunk, metadata in agent.stream(
-    {"messages": [{"role": "user", "content": "今天有哪些 AI 新闻？"}]},
-    config,
-    stream_mode="messages",
-):
-    if chunk.content:
-        print(chunk.content, end="", flush=True)
+stream = agent.stream_events(
+    {"messages": [HumanMessage("今天有哪些 AI 新闻？")]},
+    config=config,
+    version="v3",
+)
+
+for message in stream.messages:
+    for token in message.text:
+        print(token, end="", flush=True)
 ```
 
-这个模板背后已经包含模型选择、系统提示词、工具、记忆和流式输出。后续学习 Agent Middleware、MCP、Multi-Agent、RAG 和 LangGraph，本质上都是在这条最小链路上增加更强的控制、状态和知识能力。
+这个模板背后已经包含模型选择、系统提示词、工具、记忆和 v3 流式输出。课程使用的 v3 仍是实验性接口；如果项目继续沿用 `agent.stream(..., stream_mode="messages")`，就按旧接口接收“消息片段 + 元数据”的二元组。后续学习 Agent Middleware、MCP、Multi-Agent、RAG 和 LangGraph，本质上都是在这条最小链路上增加更强的控制、状态和知识能力。
 
 第一阶段到这里形成闭环：从“模型为什么能生成文字”，走到“怎样通过 API 调用模型”，再到“怎样用 LangChain 把模型、工具、记忆和服务端组合成一个真正可用的 Agent”。继续往后，重点会从“能跑起来”逐渐转向“怎样让多步骤 Agent 更可控、更可靠、更容易评估”。
