@@ -12,17 +12,17 @@ const skillGroups = [
   {
     title: "⚛️ 前端",
     color: "blue",
-    skills: ["🌐 HTML/CSS", "📜 JavaScript", "⚛️ React", "🔷 TypeScript", "💚 Vue"],
+    skills: ["🌐 HTML/CSS/JavaScript", "🔷 TypeScript", "💚 Vue", "⚛️ React"],
   },
   {
-    title: "☕ 后端",
+    title: "☕ 后端及数据库",
     color: "green",
-    skills: ["☕ Java", "🍃 Spring Boot", "🗃️ MyBatis", "🐬 MySQL", "🟢 Node.js"],
+    skills: ["🟢 Node.js", "☕ Java", "🍃 Spring Boot", "🗃️ MyBatis", "🐬 MySQL"],
   },
   {
     title: "🛠️ 工具",
     color: "purple",
-    skills: ["📦 Git", "📦 Webpack", "⚡ Vite", "🐳 Docker", "🐧 Linux"],
+    skills: ["📦 Git", "📦 Webpack", "⚡ Vite", "🐳 Docker"],
   },
 ]
 

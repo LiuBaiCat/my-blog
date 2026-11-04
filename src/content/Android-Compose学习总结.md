@@ -1,11 +1,13 @@
 ---
 title: Jetpack Compose 基础学习总结
 date: 2025-01-09
-updatetime: 2026-11-02
+updatetime: 2026-11-04
 tags: [Android, Jetpack Compose, Kotlin, 学习笔记]
-description: 基于 2024–2025 年 Jetpack Compose Codelab 截图整理的完整基础复习，涵盖生命周期、布局、Material 3、资源、懒加载列表、状态、副作用、自适应、无障碍与 UI 测试。
+description: 基于 2024–2025 年 Jetpack Compose Codelab 截图整理的基础复习，涵盖布局、Material 3、资源与网络图片、Lazy 列表、Pager、状态、副作用、自适应、无障碍与 UI 测试。
 pinned: false
 ---
+
+> Android 学习系列 3/4。上一篇：[Android 基础与工程化](/article/Android基础与工程化) · 下一篇：[Android 进阶篇](/article/Android进阶篇)
 
 # 01. 从“画界面”切换到“描述界面”
 
@@ -583,9 +585,204 @@ fun clickAddOne_updatesCount() {
 
 性能优化的起点是少做无意义工作：Lazy 列表提供稳定 `key` 和合理的 `contentType`；不要在 Composable 中直接做网络、数据库或大计算；频繁读取的状态尽量放在真正需要它的子级。`derivedStateOf` 可以帮助减少无关派生更新，但它不是给每个简单表达式加缓存的理由。先保证结构和状态流正确，再根据基准与工具结果优化。
 
-# 10. 把知识串起来
+# 10. Compose UI 补充：尺寸、图片、混合列表与 Pager
 
-## 10.1 常用 API 对照
+前面的章节已经覆盖 Compose 的骨架。这一章只补上做常见页面时最容易卡住的几个 UI 点：怎样选择 `dp` 与 `sp`，怎样加载网络图片和图标，怎样在 Lazy 列表中混合不同内容，以及怎样使用分页容器。Navigation、ViewModel、网络封装和 Room 留到进阶篇，不在 UI 基础里重复展开。
+
+## 10.1 `dp` 与 `sp`：尺寸单位和字体缩放
+
+Compose 中尺寸通常使用 `dp`，文字大小通常使用 `sp`：
+
+| 单位 | 使用场景 | 是否随用户字体设置缩放 |
+| --- | --- | --- |
+| `dp` | 宽高、间距、内边距、圆角 | 否 |
+| `sp` | `fontSize`、行高、字间距 | 是 |
+| `px` | 与底层像素 API 交互 | 不自动适配屏幕密度 |
+
+```kotlin
+Text(
+    text = "Compose 笔记",
+    fontSize = 18.sp,
+    lineHeight = 26.sp,
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+)
+```
+
+`dp` 会按屏幕密度换算为像素，所以同一尺寸在不同密度设备上的物理观感更接近。`sp` 还会叠加用户的字体缩放设置；如果所有文字都写死成 `dp` 或固定像素，用户调大字体时界面不会按预期变化。
+
+当 Canvas 或第三方 API 必须接收像素值时，再从 `LocalDensity` 转换，而不是把换算系数散落在业务代码里：
+
+```kotlin
+val density = LocalDensity.current
+val lineWidthPx = with(density) { 2.dp.toPx() }
+```
+
+尺寸适配不能只靠把所有内容缩小。大字体、小屏幕和横屏时，应让布局能换行、滚动或改变结构，而不是假设一行文字永远放得下。
+
+## 10.2 网络图片与 Coil
+
+`painterResource` 适合打包在应用里的本地图片；网络 URL 需要图片加载库处理下载、缓存、生命周期和错误状态。Compose 项目常用 Coil，Coil 3 的 Compose 集成提供 `AsyncImage`：
+
+```kotlin
+AsyncImage(
+    model = avatarUrl,
+    contentDescription = "用户头像",
+    contentScale = ContentScale.Crop,
+    modifier = Modifier
+        .size(56.dp)
+        .clip(CircleShape)
+)
+```
+
+`model` 可以是 URL、文件或图片请求对象；`contentScale = ContentScale.Crop` 适合正方形头像，它会填满边界并裁掉超出部分。`AsyncImage` 还支持占位图、错误图和加载状态，真实页面不要只显示一块空白：
+
+```kotlin
+AsyncImage(
+    model = bannerUrl,
+    contentDescription = null,
+    contentScale = ContentScale.Crop,
+    placeholder = ColorPainter(Color.LightGray),
+    error = ColorPainter(Color.DarkGray),
+    modifier = Modifier
+        .fillMaxWidth()
+        .aspectRatio(16f / 9f)
+        .clip(RoundedCornerShape(16.dp))
+)
+```
+
+`contentDescription = null` 适合纯装饰图片；如果图片本身传达信息，应该给出能说明用途的描述。依赖版本应以项目版本目录和 [Coil 官方文档](https://coil-kt.github.io/coil/compose/) 为准，示例不绑定某个具体版本。
+
+网络图片还需要考虑：
+
+- HTTPS、证书和图片服务器权限；
+- 占位图与错误图的尺寸是否导致布局跳动；
+- 列表滚动时是否重复下载；
+- 用户关闭图片加载时是否有替代信息；
+- 图片 URL 中是否包含不应出现在日志里的令牌。
+
+## 10.3 Material 图标与矢量资源
+
+Material 图标可以直接使用 `Icon` 配合 `Icons`：
+
+```kotlin
+Icon(
+    imageVector = Icons.Filled.Favorite,
+    contentDescription = "收藏",
+    tint = MaterialTheme.colorScheme.primary
+)
+```
+
+`Icon` 本身不负责点击，需要点击时放在 `IconButton` 中：
+
+```kotlin
+IconButton(onClick = onFavoriteClick) {
+    Icon(
+        imageVector = Icons.Outlined.FavoriteBorder,
+        contentDescription = if (isFavorite) "取消收藏" else "收藏"
+    )
+}
+```
+
+常用 Material 图标可能由 `material-icons-core` 提供，扩展图标集则需要额外依赖。依赖图标库前先确认当前 Compose Material 版本对应的 artifact，不要照抄旧教程中的包名。项目自己的 SVG/XML 图标更适合使用 `painterResource(R.drawable.ic_name)`。
+
+图标按钮仍要满足触摸尺寸和无障碍要求。图标是否可点击、当前是什么状态，要能从语义描述和界面反馈中判断，而不是只靠颜色变化。
+
+## 10.4 混合内容的 Lazy 列表
+
+真实列表往往不只有一种卡片。`LazyColumn` 的 `item {}` 可以放标题、加载状态或底部提示，`items()` 负责重复数据：
+
+```kotlin
+LazyColumn(
+    contentPadding = PaddingValues(16.dp),
+    verticalArrangement = Arrangement.spacedBy(12.dp)
+) {
+    item(key = "header") {
+        Text(
+            text = "今日任务",
+            style = MaterialTheme.typography.headlineSmall
+        )
+    }
+
+    items(
+        items = tasks,
+        key = { task -> task.id },
+        contentType = { "task" }
+    ) { task ->
+        TaskRow(task = task)
+    }
+
+    item(key = "footer") {
+        Text(
+            text = "共 ${tasks.size} 项",
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+```
+
+`item {}` 和 `items()` 的区别是：前者放单个固定内容，后者遍历集合生成重复内容。稳定 `key` 帮助 Compose 在插入、删除和重排时复用正确节点；`contentType` 告诉 Lazy 布局某类项目结构相同。不要用随机数或列表索引作为会变化项目的 key。
+
+如果列表包含广告、分组标题、日期分隔线等不同结构，可以给不同 `items()` 或 `item()` 提供不同 `contentType`，并让每种内容有明确的 key。不要把全部内容塞进一个 Composable 再用大量条件判断隐藏，这会让滚动复用和状态归属都变得模糊。
+
+## 10.5 `HorizontalPager` 与 `rememberPagerState`
+
+需要一页一页横向切换时，使用 Compose Foundation 的 `HorizontalPager`。`rememberPagerState` 的 `pageCount` 是 lambda，页面数量变化时能跟随最新值：
+
+```kotlin
+val pages = listOf("推荐", "关注", "附近")
+val pagerState = rememberPagerState(pageCount = { pages.size })
+
+HorizontalPager(
+    state = pagerState,
+    modifier = Modifier.fillMaxWidth()
+) { page ->
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(pages[page], style = MaterialTheme.typography.headlineMedium)
+    }
+}
+```
+
+页码 `page` 从 0 开始。页面内容可以通过 `pagerState.currentPage` 观察当前页，也可以配合 Tab 或指示器同步选择。不要让 `pageCount` 在每次重组时随机变化；页面数量应来自稳定状态。
+
+一个简单的自动轮播示例：
+
+```kotlin
+LaunchedEffect(pagerState, pages.size) {
+    while (true) {
+        delay(3_000)
+        if (!pagerState.isScrollInProgress) {
+            val next = (pagerState.currentPage + 1) % pages.size
+            pagerState.animateScrollToPage(next)
+        }
+    }
+}
+```
+
+这个例子的行为是“到最后一页后回到第一页”，不是真正无限轮播。若需求是无限滚动，应使用适合无限页面的状态映射或成熟的 Pager 方案，并明确处理页面索引、指示器和用户手势，而不是假装数组本身无限。自动轮播还应在用户正在滑动、页面不可见或无障碍要求减少动态时暂停或降级。
+
+`HorizontalPager` 与普通 `LazyRow` 的职责不同：Pager 强调一页占满视口、分页停靠和当前页；LazyRow 更适合连续横向列表。选择容器前先明确交互，而不是只看它们都能左右滑。
+
+## 10.6 本章易错点
+
+| 现象 | 常见原因 | 修正 |
+| --- | --- | --- |
+| 大字体下文字被截断 | 所有高度固定，文字仍使用单行 | 允许换行、增加最小高度或改变布局 |
+| 头像显示成椭圆 | 图片比例和裁剪不匹配 | `aspectRatio(1f)` 配合 `ContentScale.Crop` 和圆形 clip |
+| 图标按钮点不到 | 只渲染了 `Icon`，没有点击容器 | 使用 `IconButton` 或正确的可点击 Modifier |
+| 混合列表滚动错位 | key 不稳定或 contentType 不准确 | 使用业务 id，并区分项目结构 |
+| Pager 第一页索引错误 | 误以为页码从 1 开始 | Compose 索引从 0 开始 |
+| 自动轮播和手势冲突 | 定时器在用户拖动时仍强行翻页 | 检查 `isScrollInProgress`，按产品需求暂停 |
+
+这些补充仍属于 UI 层。数据从哪里来、如何缓存、页面之间怎样导航，应该在状态管理和架构章节中解决。
+
+# 11. 把知识串起来
+
+## 11.1 常用 API 对照
 
 写页面时可依次检查：怎样分层、父级和滚动边界在哪里、Modifier 顺序是否符合预期、文字和图片是否进入资源系统、哪些值会变化、状态应该放在哪里。
 
@@ -594,11 +791,14 @@ fun clickAddOne_updatesCount() {
 | 纵向、横向、叠放布局 | `Column`、`Row`、`Box` |
 | 主轴排列与交叉轴对齐 | `Arrangement`、`Alignment` |
 | 尺寸、背景、裁剪 | `Modifier.size`、`background`、`clip` |
+| 尺寸与字体单位 | `dp`、`sp`、`LocalDensity` |
 | 内容间隔 | `padding`、`spacedBy`、`contentPadding` |
 | 普通滚动 | `verticalScroll`、`horizontalScroll` |
-| 大量列表与网格 | `LazyRow`、`LazyColumn`、Lazy Grid |
+| 大量列表与网格 | `LazyRow`、`LazyColumn`、Lazy Grid、`item`、`items` |
 | 资源与图片 | `stringResource`、`painterResource`、`R` |
 | 图片缩放 | `ContentScale.Fit`、`FillBounds`、`Crop` |
+| 网络图片与图标 | Coil `AsyncImage`、`Icon`、`IconButton` |
+| 分页容器 | `HorizontalPager`、`rememberPagerState` |
 | 可观察状态与列表 | `mutableStateOf`、`rememberSaveable`、`mutableStateListOf` |
 | 主题与常用控件 | `MaterialTheme`、`Button`、`Card`、`TextField` |
 | 生命周期副作用 | `LaunchedEffect`、`DisposableEffect`、`SideEffect` |
@@ -606,7 +806,7 @@ fun clickAddOne_updatesCount() {
 | 自适应布局 | `WindowSizeClass`、宽度分类 |
 | 无障碍与测试 | `semantics`、`testTag`、`onNodeWithText` |
 
-## 10.2 常见易错点
+## 11.2 常见易错点
 
 | 现象 | 更可能的原因 | 调整方向 |
 | --- | --- | --- |
@@ -621,7 +821,7 @@ fun clickAddOne_updatesCount() {
 | 监听器在页面退出后仍存活 | 注册后没有注销 | 使用 `DisposableEffect` 的 `onDispose` |
 | 系统栏区域出现双重留白 | Insets 被重复消费 | 先检查 Scaffold 是否已经提供内边距 |
 
-## 10.3 复习清单与继续学习
+## 11.3 复习清单与继续学习
 
 能不看资料回答以下问题，这份 Compose 基础就算真正串起来了：
 
@@ -630,6 +830,10 @@ fun clickAddOne_updatesCount() {
 - `R.drawable.name` 与 `R.string.name` 分别从哪里生成？
 - `ContentScale.Crop` 与 `Fit` 的视觉差异是什么？
 - 为什么 Lazy 列表应使用 `contentPadding`？
+- 为什么尺寸通常用 `dp`，而文字大小通常用 `sp`？
+- `AsyncImage` 的 `contentScale`、占位图和错误图分别解决什么问题？
+- 混合 Lazy 列表里 `item {}` 与 `items()` 的职责有什么不同？
+- `HorizontalPager` 和 `LazyRow` 应该如何按交互语义选择？
 - `mutableStateOf`、`remember`、`rememberSaveable` 分别解决什么问题？
 - 状态提升后，无状态组件接收的数据与事件是什么？
 - `LaunchedEffect`、`rememberCoroutineScope` 和 `DisposableEffect` 的职责有什么不同？
@@ -644,7 +848,10 @@ fun clickAddOne_updatesCount() {
 - [Thinking in Compose](https://developer.android.com/develop/ui/compose/mental-model)、[Lifecycle of composables](https://developer.android.com/develop/ui/compose/lifecycle)、[Side-effects](https://developer.android.com/develop/ui/compose/side-effects)
 - [State](https://developer.android.com/develop/ui/compose/state)、[Where to hoist state](https://developer.android.com/develop/ui/compose/state-hoisting)
 - [Material 3](https://developer.android.com/develop/ui/compose/designsystems/material3)、[Lazy lists and lazy grids](https://developer.android.com/develop/ui/compose/lists)
+- [Compose layout basics](https://developer.android.com/develop/ui/compose/layouts/basics)、[Pager](https://developer.android.com/develop/ui/compose/layouts/pager)、[Images](https://developer.android.com/develop/ui/compose/graphics/images)
 - [Accessibility semantics](https://developer.android.com/develop/ui/compose/accessibility/semantics)、[Testing Compose layouts](https://developer.android.com/develop/ui/compose/testing)
 - [Use window size classes](https://developer.android.com/develop/adaptive-apps/guides/use-window-size-classes)
 
 Jetpack Compose 最核心的转变不是换一套控件名称，而是把界面看成“状态到描述”的函数：布局负责位置，Modifier 负责边界和表现，资源提供外部内容，状态驱动刷新，副作用只负责与外部世界同步。把这些边界分开，再看完整页面就会清楚很多。
+
+> 系列导航：[1/4 Kotlin 基础与进阶](/article/Kotlin基础与进阶) · [2/4 Android 基础与工程化](/article/Android基础与工程化) · **3/4 Android Compose 总结** · [4/4 Android 进阶篇](/article/Android进阶篇)

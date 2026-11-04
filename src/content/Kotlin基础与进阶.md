@@ -1,14 +1,17 @@
 ---
-title: Kotlin基础的学习
+title: Kotlin 基础与进阶
 date: 2024-12-30
-tags: [Kotlin, 基础学习]
-description: Kotlin的基础学习
+updatetime: 2026-11-04
+tags: [Kotlin, 基础学习, 协程, Android]
+description: 从语法、集合、面向对象和空安全，到 Lambda、作用域函数、对象模型与 Kotlin 协程，一份面向 Android 开发的 Kotlin 基础与进阶复习。
 pinned: false
 ---
 
-Kotlin的基础学习
+> Android 学习系列 1/4。下一篇：[Android 基础与工程化](/article/Android基础与工程化)
 
-# 1.Frist Kotlin
+这份笔记先保留早期 Kotlin 学习中的语法、集合和面向对象内容，再补上现代 Android 开发中经常出现的 Lambda、作用域函数、对象模型和协程。阅读目标不是背完整语言手册，而是能看懂并写出 Compose、ViewModel 与网络层里常见的 Kotlin 代码。
+
+# 1. First Kotlin
 
 > 最简版
 
@@ -51,7 +54,7 @@ fun sum(a: Int, b: Int): Int {   // Int 参数，返回值 Int
 ```kotlin
 fun sum(a: Int, b: Int) = a + b
 
-public fun sum(a: Int, b: Int): Int = a + b   // public 方法则必须明确写出返回类型
+public fun sum(a: Int, b: Int): Int = a + b   // 公共 API 显式写出返回类型通常更清楚
 ```
 
 
@@ -90,15 +93,6 @@ fun main(args: Array<String>) {
     val sumLambda: (Int, Int) -> Int = {x,y -> x+y}
     println(sumLambda(1,2))  // 输出 3
 }
-```
-
-> 类似于 ？↓
-
-```vue
-<script setup>
-    const SumAdd = (a, b) => {return a + b}
-    console.log(SumAdd(1, 2))  // 输出 3
-</script>
 ```
 
 ## ②定义常量与变量
@@ -495,7 +489,7 @@ fun main() {
 
 > 在 Kotlin 中任何表达式都可以用标签（label）来标记。 标签的格式为标识符后跟 @ 符号，例如：abc@、fooBar@都是有效的标签。 要为一个表达式加标签，我们只要在其前加标签即可。
 
-```
+```kotlin
 loop@ for (i in 1..100) {
     // ……
 }
@@ -505,7 +499,7 @@ loop@ for (i in 1..100) {
 
 > 现在，我们可以用标签限制 break 或者continue：
 
-```
+```kotlin
 loop@ for (i in 1..100) {
     for (j in 1..100) {
         if (……) break@loop
@@ -591,7 +585,7 @@ fun main() {
 
 > 属性声明的完整语法：
 
-```
+```kotlin
 var <propertyName>[: <PropertyType>] [= <property_initializer>]
     [<getter>]
     [<setter>]
@@ -892,7 +886,7 @@ fun main(arg:Array<String>){
 
 > Kotlin 可以创建一个只包含数据的类，关键字为 **data**：
 
-```
+```kotlin
 data class User(val name: String, val age: Int)
 ```
 
@@ -910,7 +904,7 @@ data class User(val name: String, val age: Int)
 > - 主构造函数至少包含一个参数。
 > - 所有的主构造函数的参数必须标识为`val` 或者 `var` ;
 > - 数据类不可以声明为 `abstract`, `open`, `sealed` 或者 `inner`;
-> - 数据类不能继承其他类 (但是可以实现接口)。
+> - 数据类可以继承普通类或实现接口，但自身不能声明为 `abstract`、`open`、`sealed` 或 `inner`。
 
 ```kotlin
 data class User(val name: String, val age: Int)
@@ -939,9 +933,9 @@ println("$name, $age years of age") // prints "Jane, 35 years of age"
 
 > 密封类用来表示受限的类继承结构：当一个值为有限几种的类型, 而不能有任何其他类型时。在某种意义上，他们是枚举类的扩展：枚举类型的值集合 也是受限的，但每个枚举常量只存在一个实例，而密封类 的一个子类可以有可包含状态的多个实例。
 >
-> 声明一个密封类，使用 **sealed** 修饰类，密封类可以有子类，但是所有的子类都必须要内嵌在密封类中。
+> 声明密封类型使用 **sealed** 修饰类或接口。现代 Kotlin 允许直接子类型位于同一模块、同一包中，不必全部内嵌在父类型内部；早期 Kotlin 才要求它们嵌套。
 >
-> sealed 不能修饰 interface ,abstract class(会报 warning,但是不会出现编译错误)
+> `sealed interface` 可以用于组合受控类型。密封类型不能直接实例化，也不应与 `open` 组合使用。
 
 ```kotlin
 sealed class Expr
@@ -957,3 +951,373 @@ fun eval(expr: Expr): Double = when (expr) {
 ```
 
 > 使用密封类的关键好处在于使用 when 表达式 的时候，如果能够 验证语句覆盖了所有情况，就不需要为该语句再添加一个 else 子句了。
+
+# 11. 集合：从保存数据到处理数据
+
+Android 页面里经常要处理任务列表、导航项和接口返回的数据。Kotlin 的集合 API 可以把“取字段、过滤、排序、分组”写成一条可读的链。
+
+## ①可变集合与只读集合
+
+`listOf()`、`mapOf()` 和 `setOf()` 返回只读接口，适合描述一份不会被原地修改的数据；`mutableListOf()`、`mutableMapOf()` 返回可变集合。
+
+```kotlin
+val names = listOf("Android", "Kotlin", "Compose")
+val scores = mutableMapOf("Kotlin" to 90, "Compose" to 85)
+scores["Android"] = 95
+```
+
+“只读”不等于集合内部元素一定不可变，它只表示通过这个引用不能调用 `add()`、`remove()`。在 Compose 中，界面状态最好用不可变数据加替换整个集合的方式更新；需要可观察列表时，则使用 `mutableStateListOf()`，这两种情况不要混为一谈。
+
+## ②常用集合操作符
+
+| 操作符 | 作用 | 示例结果 |
+| --- | --- | --- |
+| `map` | 把每个元素转换成另一个值 | 列表长度不变 |
+| `filter` | 保留符合条件的元素 | 列表可能变短 |
+| `flatMap` | 转换后把多个集合合并成一个 | 适合嵌套列表 |
+| `sortedBy` | 按属性升序排序 | 返回新列表 |
+| `groupBy` | 按属性分组 | 返回 `Map` |
+| `sumOf` | 对数值属性求和 | 返回数值 |
+| `any` / `all` | 判断是否存在或是否全部满足 | 返回布尔值 |
+
+```kotlin
+data class Task(val title: String, val done: Boolean, val minutes: Int)
+
+val tasks = listOf(
+    Task("阅读 Compose", false, 30),
+    Task("整理笔记", true, 20),
+    Task("练习协程", false, 45)
+)
+
+val unfinished = tasks
+    .filter { !it.done }
+    .sortedByDescending { it.minutes }
+    .map { it.title }
+
+val totalMinutes = tasks.sumOf { it.minutes }
+```
+
+链式调用要从左往右读：先过滤，再排序，最后只保留标题。复杂链路可以换行，并把每一步的含义通过命名或注释表达出来；不要为了炫技把十几个操作塞在同一行。
+
+## ③不可变数据与更新
+
+数据类配合 `copy()`，可以让状态更新变得可追踪：
+
+```kotlin
+data class TodoUiState(
+    val loading: Boolean = false,
+    val tasks: List<Task> = emptyList(),
+    val error: String? = null
+)
+
+val next = state.copy(loading = false, tasks = newTasks)
+```
+
+`copy()` 会创建新对象，旧状态保持不变。这种写法适合 Compose 重组、Flow 状态流和测试；如果集合本身是可变的，界面可能读不到你期待的变化，或者出现“内容改了但引用没变”的问题。
+
+# 12. Lambda 与函数类型
+
+Lambda 是“可以作为参数传递的代码块”。Compose 的点击回调、`items` 的内容 lambda 和协程启动器都大量使用它。
+
+```kotlin
+val add: (Int, Int) -> Int = { a, b -> a + b }
+val onDone: () -> Unit = { println("完成") }
+
+fun runTask(action: () -> Unit) {
+    action()
+}
+```
+
+函数类型的基本形式是 `(参数类型) -> 返回类型`。如果只有一个参数，可以使用 `it`；但参数含义不直观时，显式命名更清楚：
+
+```kotlin
+val titles = tasks.map { task -> task.title }
+tasks.forEach { task ->
+    println(task.title)
+}
+```
+
+尾随 lambda 写法允许把最后一个函数参数移到括号外：
+
+```kotlin
+Button(onClick = { count++ }) {
+    Text("点击 $count 次")
+}
+```
+
+Compose 的 `Button` 第一个参数是 `onClick`，末尾还有一个 `content` 槽位；`{ Text(...) }` 就是内容 lambda。理解这一点后，阅读 Compose 组件签名会轻松很多。
+
+# 13. 作用域函数：让对象配置更紧凑
+
+Kotlin 提供 `let`、`run`、`with`、`apply`、`also` 五个常用作用域函数。它们都接收一个 lambda，区别主要在接收者、返回值和参数形式。
+
+| 函数 | 接收者 | lambda 内引用 | 返回值 | 常见用途 |
+| --- | --- | --- | --- | --- |
+| `let` | `it` | `it` | lambda 最后一行 | 可空值处理、转换 |
+| `run` | `this` | `this` | lambda 最后一行 | 基于对象计算 |
+| `with` | `this` | `this` | lambda 最后一行 | 对同一对象执行多项操作 |
+| `apply` | `this` | `this` | 原对象 | 配置对象属性 |
+| `also` | `it` | `it` | 原对象 | 日志、附加校验 |
+
+```kotlin
+val user = User("Liu").apply { age = 20 }
+val displayName = user.name
+    .takeIf { it.isNotBlank() }
+    ?.let { "用户：$it" }
+    ?: "未登录"
+```
+
+选择原则：需要配置并继续链式调用时优先 `apply`；需要基于一个值做转换时用 `let`；需要在对象上下文中计算一个结果时用 `run`。不要把 `apply` 当成所有代码块的外壳，否则只会让作用域更难读。
+
+# 14. 对象、伴生对象、枚举与密封类型
+
+## ①`object`：只创建一个实例
+
+`object` 声明的是单例。它适合保存无状态工具、常量入口或确实只应存在一个实例的对象：
+
+```kotlin
+object AppConfig {
+    const val PAGE_SIZE = 20
+
+    fun isDebugBuild(debuggable: Boolean): Boolean = debuggable
+}
+
+AppConfig.PAGE_SIZE
+```
+
+单例不是“所有东西都往里放的垃圾桶”。如果对象需要持有可变状态、依赖数据库或随页面生命周期变化，就应该交给 ViewModel、数据层或依赖注入容器管理。`object` 的初始化是懒加载的，但一旦创建就会在进程内长期存在，错误地缓存 `Activity`、`View` 或 `Context` 很容易造成内存泄漏。
+
+对象表达式则用于临时创建匿名对象：
+
+```kotlin
+val listener = object : OnTaskChanged {
+    override fun onChanged(title: String) {
+        println(title)
+    }
+}
+```
+
+这和 Java 匿名内部类相似。Android 中更常见的简化写法是 SAM 转换或 lambda，能直接表达函数时不必刻意保留匿名对象。
+
+## ②伴生对象：类级别的成员
+
+`companion object` 是声明在类内部的特殊对象，可以通过类名访问，常用于工厂方法、常量或与类紧密相关的构造逻辑：
+
+```kotlin
+data class UserId(val value: String) {
+    companion object {
+        fun from(raw: String): UserId = UserId(raw.trim())
+    }
+}
+
+val id = UserId.from("  42  ")
+```
+
+伴生对象不是 Java 的静态成员，只是 Kotlin 提供了接近静态调用的语法。若只是纯常量，优先考虑包级常量或顶层声明；若工厂需要依赖外部服务，也不要为了“看起来像静态方法”把依赖偷偷塞进伴生对象。
+
+## ③枚举：有限且固定的值
+
+枚举适合表示一组固定选项，例如任务优先级：
+
+```kotlin
+enum class Priority(val label: String) {
+    LOW("低"),
+    NORMAL("普通"),
+    HIGH("高")
+}
+
+val priority = Priority.HIGH
+println(priority.label)
+```
+
+枚举值在编译期固定，数量有限，适合直接参与 `when`、筛选和序列化映射。若值需要携带更多动态数据，或不同分支拥有不同结构，密封类型通常更灵活。
+
+## ④密封接口与密封类：受控的类型集合
+
+密封类型强调“所有实现都在同一模块的受控范围内”。它很适合建模加载状态：
+
+```kotlin
+sealed interface UiState<out T> {
+    data object Loading : UiState<Nothing>
+    data class Success<T>(val data: T) : UiState<T>
+    data class Error(val message: String) : UiState<Nothing>
+}
+
+fun render(state: UiState<List<String>>) = when (state) {
+    UiState.Loading -> "加载中"
+    is UiState.Success -> "共 ${state.data.size} 项"
+    is UiState.Error -> state.message
+}
+```
+
+这里使用 `sealed interface`，比传统 `sealed class` 更容易组合接口。密封类型的子类型不必全部嵌套在父类型内部；它们只需位于同一模块并遵守语言规则。把状态写成 `Loading / Success / Error` 后，`when` 能帮助检查是否漏掉分支，也比用多个互不相关的布尔值更不容易出现矛盾状态。
+
+# 15. 空安全与扩展函数在 Android 中的用法
+
+## ①可空性属于类型
+
+Kotlin 在类型层面区分 `String` 与 `String?`。可空值不能直接调用成员，必须先做判断、安全调用或显式断言：
+
+```kotlin
+fun greeting(name: String?): String {
+    val safeName = name?.trim().orEmpty()
+    return if (safeName.isBlank()) "你好，访客" else "你好，$safeName"
+}
+```
+
+常用操作可以按目的区分：
+
+| 写法 | 作用 | 注意点 |
+| --- | --- | --- |
+| `value?.length` | 安全调用 | 结果仍可能为 `null` |
+| `value ?: fallback` | 提供默认值 | 不要用空字符串掩盖业务错误 |
+| `value?.let {}` | 仅非空时执行 | `let` 适合短转换，不适合层层嵌套 |
+| `value!!` | 断言非空 | 断言失败会抛异常，业务代码尽量不用 |
+| `requireNotNull(value)` | 参数校验并抛异常 | 适合表达调用者违反了契约 |
+
+Android 中来自 Intent、网络、数据库或资源的数据都可能是 `null`。不要用一串 `!!` 把问题推迟到运行时，而应在数据边界尽早校验并转换成稳定的 UI 状态。
+
+##②扩展函数：给已有类型补充行为
+
+扩展函数不能修改原类，也不能访问其私有成员，但可以让调用点更自然：
+
+```kotlin
+fun String.toDisplayName(): String =
+    trim().ifBlank { "匿名用户" }
+
+fun Int.toDpText(): String = "${this}dp"
+
+val name = "  Compose  ".toDisplayName()
+```
+
+扩展函数本质上是静态函数，接收者作为第一个参数传入。导入时要注意来源；同名扩展过多时，调用点可能很难看出实际执行哪一个。扩展属性也不能保存真正的字段，只能通过 getter/setter 计算：
+
+```kotlin
+val String.isHttpUrl: Boolean
+    get() = startsWith("https://") || startsWith("http://")
+```
+
+扩展适合无状态转换和领域语义，不适合把复杂业务逻辑藏进一个看似简单的点号调用。
+
+# 16. 协程：把异步流程写成顺序代码
+
+##①`suspend` 函数表示可能挂起
+
+协程可以让异步代码保留“从上到下”的阅读顺序。`suspend` 函数只能在协程或其他挂起函数中调用：
+
+```kotlin
+suspend fun loadTitle(): String {
+    delay(500)
+    return "远程标题"
+}
+
+suspend fun showTitle() {
+    val title = loadTitle()
+    println(title)
+}
+```
+
+`delay` 会挂起协程，不会阻塞线程。真正的网络或数据库调用是否适合放到协程，还要看 API 本身是否支持取消，以及调用应运行在哪个 Dispatcher 上。
+
+##②`launch` 与 `async`
+
+`CoroutineScope.launch` 启动一个不直接返回结果的协程；`async` 返回 `Deferred<T>`，需要时用 `await()` 取结果：
+
+```kotlin
+scope.launch {
+    val first = async { loadTitle() }
+    val second = async { loadTitle() }
+    println(first.await() + second.await())
+}
+```
+
+并发启动不代表可以忽略失败。结构化并发要求子任务归属于父作用域：父协程取消时，子任务也应被取消；其中一个子任务失败时，按作用域配置可能取消整个协程树。页面离开时不能留下无人管理的后台任务。
+
+##③Dispatcher、取消与异常
+
+常见 Dispatcher 包括：
+
+| Dispatcher | 适合的工作 |
+| --- | --- |
+| `Dispatchers.Main` | 更新 UI 状态、调用主线程 API |
+| `Dispatchers.IO` | 阻塞式文件、数据库或网络读写 |
+| `Dispatchers.Default` | CPU 密集型计算 |
+
+现代挂起 API 往往已经处理好线程切换，不要机械地在每一行前后包 `withContext`。在 Android UI 中，更新 State 应回到主线程；具体耗时工作由数据层或合适的 Dispatcher 完成。
+
+协程取消是协作式的。代码要尊重 `ensureActive()` 或挂起点抛出的 `CancellationException`，不要把它当成普通错误吞掉：
+
+```kotlin
+scope.launch {
+    try {
+        loadTitle()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        showError(e.message)
+    }
+}
+```
+
+##④`viewModelScope` 与 `rememberCoroutineScope`
+
+`viewModelScope` 随 ViewModel 存活，适合页面数据加载和业务请求；`rememberCoroutineScope` 随 Composable 离开组合而取消，适合由点击、滚动等 UI 事件启动的短任务：
+
+```kotlin
+@Composable
+fun SaveButton(onSave: suspend () -> Unit) {
+    val scope = rememberCoroutineScope()
+    Button(onClick = { scope.launch { onSave() } }) {
+        Text("保存")
+    }
+}
+```
+
+这里的 `onSave` 只是 UI 层回调示例，真实业务通常交给 ViewModel。不要在 Composable 函数体中直接调用 `launch` 或发起请求；重组可能重复执行函数体。需要随组合启动的工作放到 `LaunchedEffect`，由事件触发的工作用 `rememberCoroutineScope`。
+
+##⑤协程与 Flow 的边界
+
+协程描述一次异步执行，Flow 描述可连续发出多个值的数据流。ViewModel 常用 `StateFlow` 暴露 UI 状态，网络或数据库层可能返回 `Flow`。本系列不展开 Flow 的完整操作符；现阶段只需记住：Flow 的收集也要在受控作用域中完成，Android UI 应使用生命周期感知的收集方式，而不是无条件在 Composable 中自行收集。
+
+# 17. Android 开发中的 Kotlin 习惯
+
+##①用小数据类表达领域值
+
+```kotlin
+data class Task(
+    val id: Long,
+    val title: String,
+    val done: Boolean = false
+)
+```
+
+数据类适合承载稳定的值对象和 UI 状态。不要在数据类里放可变的全局缓存；更新时用 `copy()` 产生新值，便于 Compose 和状态流比较。
+
+##②用`when`表达完整分支
+
+对枚举、密封类型和业务状态优先使用 `when`，并在需要时让编译器检查穷尽性。大量互斥布尔值会制造“同时加载和失败”的非法状态，状态模型应该让非法组合无法表示。
+
+##③让函数保持小而可测试
+
+优先写只依赖参数的函数，把网络、数据库和 UI 副作用推到边界。一个函数同时读全局变量、发请求、改缓存并弹提示，测试和排错都会变难。依赖通过参数或构造函数传入，Android 项目才能逐步形成可替换的数据层。
+
+##④命名表达意图
+
+`data`、`list`、`state` 只能说明类型，不能说明业务含义。用 `unfinishedTasks`、`isSaving`、`onTaskChecked` 这类名字，让调用方不需要猜。Compose 回调通常以 `on` 开头，状态参数则用名词或形容词。
+
+# 18. Kotlin 复习清单
+
+| 主题 | 应能回答的问题 |
+| --- | --- |
+| 类型与空安全 | `String?` 与 `String` 有何区别？什么时候用 `let`、`?:` 或 `requireNotNull`？ |
+| 集合 | 只读集合是否真的不可变？`map`、`filter`、`sumOf` 分别返回什么？ |
+| 面向对象 | 主构造函数、继承、接口和伴生对象如何协作？ |
+| 对象模型 | `object` 单例何时会长期持有引用？枚举和密封类型分别适合什么状态？ |
+| Lambda | 函数类型、尾随 lambda 和 `it` 如何阅读？ |
+| 作用域函数 | `let`、`apply`、`run` 的接收者与返回值有什么不同？ |
+| 协程 | `suspend`、`launch`、`async` 和取消分别解决什么问题？ |
+| Android 边界 | 哪些代码应放进 ViewModel、数据层或 Composable？ |
+
+如果这些概念还不稳，先回到 Compose 的 `@Composable` 和状态章节，观察 Kotlin 的 lambda、数据类与协程如何落到真实 UI。下一篇从项目创建、Gradle、Manifest 和 Activity 启动流程开始，把语言知识放回 Android 工程。
+
+> 系列导航：**1/4 Kotlin 基础与进阶** · [2/4 Android 基础与工程化](/article/Android基础与工程化) · [3/4 Android Compose 总结](/article/Android-Compose学习总结) · [4/4 Android 进阶篇](/article/Android进阶篇)
